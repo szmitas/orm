@@ -88,7 +88,6 @@ class CLI {
 	public function h1($text,$length) {
 		$text = strtoupper(trim($text));
 		$diff = $length - strlen($text);
-		echo $diff;
 		if ($diff<2){
 			$diff= 2; 
 		}
@@ -99,7 +98,6 @@ class CLI {
 		for($i=0;$i<$diff/2;$i++){
 			$decoration.="=";
 		}
-		echo $diff;
 		$text = "\n".$decoration . " ". $text . " " . $decoration . "\n";
 		return $text;
 	}

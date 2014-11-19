@@ -1,14 +1,18 @@
 CREATE TABLE users (
-user_id serial,
+user_id serial PRIMARY KEY,
 login text,
 password text
 );
-CREATE TABLE users_privilieges (
-priviliege_id integer,
-user_id integer,
-description text
+
+CREATE TABLE "privileges" (
+privilege_id serial,
+"name" text DEFAULT 'maciej',
+PRIMARY KEY (privilege_id)
 );
-CREATE TABLE privilieges (
-priviliege_id serial,
-name text
+
+CREATE TABLE users_privileges (
+privilege_id integer REFERENCES privileges (privilege_id),
+user_id integer  REFERENCES users (user_id),
+description text,
+UNIQUE (user_id, privilege_id)
 );

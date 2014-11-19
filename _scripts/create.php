@@ -1,5 +1,6 @@
-#!/usr/bin/php
+#!/usr/bin/env php
 <?php
+
 require_once '../Includes/CLI.php';
         const DOT_FILL = 30;
         CONST HEADER_FILL = 32;

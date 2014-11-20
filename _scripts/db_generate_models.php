@@ -142,9 +142,8 @@ LEFT JOIN information_schema.constraint_column_usage ccu
         } else {
             throw new Exception('(tableAdd) Wrong table type: ' . print_r($row, true));
         }
-
         $this->tables[] = $new_table;
-        return $this->tables[count($this->tables)];
+        return $this->tables[count($this->tables) - 1];
     }
 
     protected function getTable($table_name) {
@@ -168,8 +167,53 @@ LEFT JOIN information_schema.constraint_column_usage ccu
     }
 
     public function singular($word) {
-        // Twoja copy pasta mi nie banglała, nie chce misie tego robic teraz :P
+        // first letter to upper
+        $word [0] = strtoupper($word [0]);
+
+        // delete -ies
+        if (substr($word, strlen($word) - 3) == "ies") {
+            $word = substr($word, 0, strlen($word) - 3);
+            $word .= "y";
+        }
+        // delete -s
+        if ($word[strlen($word) - 1] == "s") {
+            $word = substr($word, 0, strlen($word) - 1);
+        }
+
+        while (substr_count($word, "ies_")) {
+            $index = strpos($word, "ies_");
+            $word = $this->str_replace_limit("ies_", "y", $word);
+            $word[$index + 1] = strtoupper($word[$index + 1]);
+        }
+
+        while (substr_count($word, "s_")) {
+            $index = strpos($word, "s_");
+            $word = $this->str_replace_limit("s_", "", $word);
+            $word[$index] = strtoupper($word[$index]);
+        }
+
+        while (substr_count($word, "_")) {
+            $index = strpos($word, "_");
+            $word = $this->str_replace_limit("_", "", $word);
+            $word[$index] = strtoupper($word[$index]);
+        }
+        echo $word;
         return $word;
+    }
+
+    public function str_replace_limit($search, $replace, $string, $limit = 1) {
+        if (is_bool($pos = (strpos($string, $search))))
+            return $string;
+
+        $search_len = strlen($search);
+
+        for ($i = 0; $i < $limit; $i++) {
+            $string = substr_replace($string, $replace, $pos, $search_len);
+
+            if (is_bool($pos = (strpos($string, $search))))
+                break;
+        }
+        return $string;
     }
 
     public function parseTable($table) {
@@ -206,7 +250,7 @@ LEFT JOIN information_schema.constraint_column_usage ccu
         $table_name = $this->singular($table->name);
         $table_name[0] = strtoupper($table_name[0]);
 
-        echo CLI::dotFill($table_name . ' (' . CLI::color($table->type, dark_gray) . ')', DOT_FILL +11);
+        echo CLI::dotFill($table_name . ' (' . CLI::color($table->type, dark_gray) . ')', DOT_FILL + 11);
 
         $result.= 'class D' . $table_name . 'Record extends ' . $base_class . ' {';
         $result.="\n";
@@ -226,17 +270,17 @@ LEFT JOIN information_schema.constraint_column_usage ccu
         }
         $result.="    );\n";
         $result.="\n";
-        if ($table->type==='table'){
-        $result.="\n";
-        $result.="    public function delete() {\n";
-	$result.="        \$this->deleted = time();\n";
-	$result.="        \$this->save();\n";
-	$result.="    }\n";
+        if ($table->type === 'table') {
+            $result.="\n";
+            $result.="    public function delete() {\n";
+            $result.="        \$this->deleted = time();\n";
+            $result.="        \$this->save();\n";
+            $result.="    }\n";
         } else {
-        $result.="\n";
-        $result.="    public function delete() {\n";
-	$result.="        throw new Exception('Cannot delete a view record.');\n";
-	$result.="    }\n";    
+            $result.="\n";
+            $result.="    public function delete() {\n";
+            $result.="        throw new Exception('Cannot delete a view record.');\n";
+            $result.="    }\n";
         }
         $result.="}\n";
         echo CLI::color("saved", green);

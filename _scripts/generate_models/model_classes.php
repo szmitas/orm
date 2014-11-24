@@ -17,8 +17,8 @@ class Table {
     public $name;
     public $type;
     public $columns = array();
-    public $relationship = array();
- 
+    public $relationships = array();
+
     /**
      * 
      * @param type $table_name
@@ -27,12 +27,12 @@ class Table {
     public function getReferenceTo($table_name) {
         foreach ($this->columns as $column) {
             if ($column->foreign_key && $column->foreign_key->referenced_table === $table_name) {
-                return array('column' => $column->name, 'foreign_key'=> $column->foreign_key);
+                return array('column' => $column->name, 'foreign_key' => $column->foreign_key);
             }
         }
         return false;
     }
-    
+
     public function hasReferenceTo($table_name) {
         foreach ($this->columns as $column) {
             if ($column->foreign_key && $column->foreign_key->referenced_table === $table_name) {
@@ -41,6 +41,7 @@ class Table {
         }
         return false;
     }
+
 }
 
 class Column {
@@ -66,11 +67,9 @@ interface Fetcher {
     public function fetch();
 }
 
-
-
 class Generator {
 
-    public function singular($word) {
+    public function singular($word, $delete_underscores = true) {
         // first letter to upper
         $word [0] = strtoupper($word [0]);
 
@@ -86,22 +85,36 @@ class Generator {
 
         while (substr_count($word, "ies_")) {
             $index = strpos($word, "ies_");
-            $word = self::str_replace_limit("ies_", "y", $word);
-            $word[$index + 1] = strtoupper($word[$index + 1]);
+            if (!$delete_underscores) {
+                $word = self::str_replace_limit("ies", "y", $word);
+            } else {
+                $word = self::str_replace_limit("ies_", "y", $word);
+                $word[$index + 1] = strtoupper($word[$index + 1]);
+            }
         }
 
         while (substr_count($word, "s_")) {
             $index = strpos($word, "s_");
-            $word = self::str_replace_limit("s_", "", $word);
-            $word[$index] = strtoupper($word[$index]);
+            if (!$delete_underscores) {
+                $word = self::str_replace_limit("s", "", $word);
+            } else {
+                $word = self::str_replace_limit("s_", "", $word);
+                $word[$index] = strtoupper($word[$index]);
+            }
         }
 
-        while (substr_count($word, "_")) {
-            $index = strpos($word, "_");
-            $word = self::str_replace_limit("_", "", $word);
-            $word[$index] = strtoupper($word[$index]);
+        if ($delete_underscores) {
+            while (substr_count($word, "_")) {
+                $index = strpos($word, "_");
+                $word = self::str_replace_limit("_", "", $word);
+                $word[$index] = strtoupper($word[$index]);
+            }
         }
         return $word;
+    }
+
+    public function firstLettersToUpper($word) {
+        return str_replace("_", "", mb_convert_case($word, MB_CASE_TITLE, 'UTF-8'));
     }
 
     public static function str_replace_limit($search, $replace, $string, $limit = 1) {
@@ -126,5 +139,3 @@ class Generator {
     }
 
 }
-
-

@@ -21,12 +21,13 @@ class Dumper {
     public function connect() {
         $this->db = new PDO($this->config ['driver'], $this->config ['username'], $this->config ['password']);
     }
-/**
- * Fetch structure from database.
- * 
- * Can add custom fetcher by passing a fetcher instance as an argument.
- * @param Fetcher $custom_fetcher
- */
+
+    /**
+     * Fetch structure from database.
+     * 
+     * Can add custom fetcher by passing a fetcher instance as an argument.
+     * @param Fetcher $custom_fetcher
+     */
     public function fetch($custom_fetcher = null) {
 
         if ($custom_fetcher instanceof Fetcher) {
@@ -45,21 +46,21 @@ class Dumper {
             }
             $this->addColumn($row);
         }
-        
+
         $this->setRelationships();
     }
-    
-    protected function setRelationships(){
+
+    protected function setRelationships() {
         foreach ($this->tables as $table) {
             foreach ($this->tables as $relationship_table) {
-                if ($table->name !== $relationship_table->name){
-                    if ($reference = $relationship_table->getReferenceTo($table->name)) {
+                if ($table->name !== $relationship_table->name) {
+                    $reference = $relationship_table->getReferenceTo($table->name);
+                    if ($reference) {
                         $relationship = new Relationship();
                         $relationship->table = $relationship_table->name;
                         $relationship->type = 'many-to-many';
-                        $relationship->foreign_key = $reference['column'];
-                        $table->relationship[] = $relationship;
-                        
+                        $relationship->foreign_key = $reference['foreign_key'];
+                        $table->relationships[] = $relationship;
                     }
                 }
             }

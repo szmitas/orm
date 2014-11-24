@@ -17,6 +17,44 @@ class DAdminBaseRecord extends FActiveRecord {
         "login"=>"text",
     );
 
+    // RELATIONSHIPS OBJECTS
+    private $_admins_privileges = null;
+    private $_events = null;
+    private $_posts = null;
+    private $_relationship = null;
+
+    public function __construct($relationship = null) {
+        if($relationship !== null) {
+            $this->relationship = $relationship;
+        }
+    }
+
+    // RELATIONSHIPS METHODS
+    public function getAdminsPrivileges() {
+        if($this->_admins_privileges === null) {
+            $this->_admins_privileges = DAdminPrivilegeRecord::finder()->findByAdminId($this->admin_id);
+        }
+        return $this->_admins_privileges;
+    }
+
+    public function getEvents() {
+        if($this->_events === null) {
+            $this->_events = DEventRecord::finder()->findByAdminId($this->admin_id);
+        }
+        return $this->_events;
+    }
+
+    public function getPosts() {
+        if($this->_posts === null) {
+            $this->_posts = DPostRecord::finder()->findByAdminId($this->admin_id);
+        }
+        return $this->_posts;
+    }
+
+    public function getRelationship() {
+        return $this->_relationship;
+    }
+
 
     public function delete() {
         $this->deleted = time();
@@ -55,7 +93,8 @@ class DAdminPrivilegeBaseRecord extends FActiveRecord {
         "privilege_id"=>"integer",
     );
 
-    // ONE-TO-ONE RELATIONSHIPS
+
+    // FOREIGN KEYS METHODS
     public function getAdmin() {
         return DAdminRecord::finder()->findByPK($this->admin_id);
     }
@@ -107,6 +146,28 @@ class DAgeCategoryBaseRecord extends FActiveRecord {
         "year"=>"text",
     );
 
+    // RELATIONSHIPS OBJECTS
+    private $_events = null;
+    private $_relationship = null;
+
+    public function __construct($relationship = null) {
+        if($relationship !== null) {
+            $this->relationship = $relationship;
+        }
+    }
+
+    // RELATIONSHIPS METHODS
+    public function getEvents() {
+        if($this->_events === null) {
+            $this->_events = DEventRecord::finder()->findByAgeCategoryId($this->age_category_id);
+        }
+        return $this->_events;
+    }
+
+    public function getRelationship() {
+        return $this->_relationship;
+    }
+
 
     public function delete() {
         $this->deleted = time();
@@ -148,6 +209,28 @@ class DChildrenRunGroupBaseRecord extends FActiveRecord {
         "name"=>"text",
         "year"=>"integer",
     );
+
+    // RELATIONSHIPS OBJECTS
+    private $_childrens_runs_participants = null;
+    private $_relationship = null;
+
+    public function __construct($relationship = null) {
+        if($relationship !== null) {
+            $this->relationship = $relationship;
+        }
+    }
+
+    // RELATIONSHIPS METHODS
+    public function getChildrensRunsParticipants() {
+        if($this->_childrens_runs_participants === null) {
+            $this->_childrens_runs_participants = DChildrenRunParticipantRecord::finder()->findByChildrenRunGroupId($this->children_run_group_id);
+        }
+        return $this->_childrens_runs_participants;
+    }
+
+    public function getRelationship() {
+        return $this->_relationship;
+    }
 
 
     public function delete() {
@@ -195,7 +278,8 @@ class DChildrenRunParticipantBaseRecord extends FActiveRecord {
         "year"=>"text",
     );
 
-    // ONE-TO-ONE RELATIONSHIPS
+
+    // FOREIGN KEYS METHODS
     public function getChildrenRunGroup() {
         return DChildrenRunGroupRecord::finder()->findByPK($this->children_run_group_id);
     }
@@ -239,6 +323,36 @@ class DClassificationBaseRecord extends FActiveRecord {
         "year"=>"text",
     );
 
+    // RELATIONSHIPS OBJECTS
+    private $_events = null;
+    private $_participants_classifications = null;
+    private $_relationship = null;
+
+    public function __construct($relationship = null) {
+        if($relationship !== null) {
+            $this->relationship = $relationship;
+        }
+    }
+
+    // RELATIONSHIPS METHODS
+    public function getEvents() {
+        if($this->_events === null) {
+            $this->_events = DEventRecord::finder()->findByClassificationId($this->classification_id);
+        }
+        return $this->_events;
+    }
+
+    public function getParticipantsClassifications() {
+        if($this->_participants_classifications === null) {
+            $this->_participants_classifications = DParticipantClassificationRecord::finder()->findByClassificationId($this->classification_id);
+        }
+        return $this->_participants_classifications;
+    }
+
+    public function getRelationship() {
+        return $this->_relationship;
+    }
+
 
     public function delete() {
         $this->deleted = time();
@@ -274,6 +388,36 @@ class DClubBaseRecord extends FActiveRecord {
         "name"=>"text",
         "year"=>"text",
     );
+
+    // RELATIONSHIPS OBJECTS
+    private $_events = null;
+    private $_participant_datas = null;
+    private $_relationship = null;
+
+    public function __construct($relationship = null) {
+        if($relationship !== null) {
+            $this->relationship = $relationship;
+        }
+    }
+
+    // RELATIONSHIPS METHODS
+    public function getEvents() {
+        if($this->_events === null) {
+            $this->_events = DEventRecord::finder()->findByClubId($this->club_id);
+        }
+        return $this->_events;
+    }
+
+    public function getParticipantDatas() {
+        if($this->_participant_datas === null) {
+            $this->_participant_datas = DParticipantDataRecord::finder()->findByClubId($this->club_id);
+        }
+        return $this->_participant_datas;
+    }
+
+    public function getRelationship() {
+        return $this->_relationship;
+    }
 
 
     public function delete() {
@@ -315,6 +459,28 @@ class DCommentBaseRecord extends FActiveRecord {
         "year"=>"text",
     );
 
+    // RELATIONSHIPS OBJECTS
+    private $_events = null;
+    private $_relationship = null;
+
+    public function __construct($relationship = null) {
+        if($relationship !== null) {
+            $this->relationship = $relationship;
+        }
+    }
+
+    // RELATIONSHIPS METHODS
+    public function getEvents() {
+        if($this->_events === null) {
+            $this->_events = DEventRecord::finder()->findByCommentId($this->comment_id);
+        }
+        return $this->_events;
+    }
+
+    public function getRelationship() {
+        return $this->_relationship;
+    }
+
 
     public function delete() {
         $this->deleted = time();
@@ -352,6 +518,7 @@ class DConfigBaseRecord extends FActiveRecord {
     );
 
 
+
     public function delete() {
         $this->deleted = time();
         $this->save();
@@ -386,6 +553,28 @@ class DConfigHistoryBaseRecord extends FActiveRecord {
         "key"=>"text",
         "value"=>"text",
     );
+
+    // RELATIONSHIPS OBJECTS
+    private $_events = null;
+    private $_relationship = null;
+
+    public function __construct($relationship = null) {
+        if($relationship !== null) {
+            $this->relationship = $relationship;
+        }
+    }
+
+    // RELATIONSHIPS METHODS
+    public function getEvents() {
+        if($this->_events === null) {
+            $this->_events = DEventRecord::finder()->findByConfigHistoryId($this->config_history_id);
+        }
+        return $this->_events;
+    }
+
+    public function getRelationship() {
+        return $this->_relationship;
+    }
 
 
     public function delete() {
@@ -449,7 +638,8 @@ class DEventBaseRecord extends FActiveRecord {
         "type"=>"text",
     );
 
-    // ONE-TO-ONE RELATIONSHIPS
+
+    // FOREIGN KEYS METHODS
     public function getAdmin() {
         return DAdminRecord::finder()->findByPK($this->admin_id);
     }
@@ -535,6 +725,36 @@ class DMediaBaseRecord extends FActiveRecord {
         "upload_date"=>"timestamp with time zone",
     );
 
+    // RELATIONSHIPS OBJECTS
+    private $_posts = null;
+    private $_supporters = null;
+    private $_relationship = null;
+
+    public function __construct($relationship = null) {
+        if($relationship !== null) {
+            $this->relationship = $relationship;
+        }
+    }
+
+    // RELATIONSHIPS METHODS
+    public function getPosts() {
+        if($this->_posts === null) {
+            $this->_posts = DPostRecord::finder()->findByMediaId($this->media_id);
+        }
+        return $this->_posts;
+    }
+
+    public function getSupporters() {
+        if($this->_supporters === null) {
+            $this->_supporters = DSupporterRecord::finder()->findByMediaId($this->media_id);
+        }
+        return $this->_supporters;
+    }
+
+    public function getRelationship() {
+        return $this->_relationship;
+    }
+
 
     public function delete() {
         $this->deleted = time();
@@ -575,6 +795,44 @@ class DModuleBaseRecord extends FActiveRecord {
         "name"=>"text",
     );
 
+    // RELATIONSHIPS OBJECTS
+    private $_events = null;
+    private $_modules_config = null;
+    private $_modules_config_history = null;
+    private $_relationship = null;
+
+    public function __construct($relationship = null) {
+        if($relationship !== null) {
+            $this->relationship = $relationship;
+        }
+    }
+
+    // RELATIONSHIPS METHODS
+    public function getEvents() {
+        if($this->_events === null) {
+            $this->_events = DEventRecord::finder()->findByModuleId($this->module_id);
+        }
+        return $this->_events;
+    }
+
+    public function getModulesConfig() {
+        if($this->_modules_config === null) {
+            $this->_modules_config = DModuleConfigRecord::finder()->findByModuleId($this->module_id);
+        }
+        return $this->_modules_config;
+    }
+
+    public function getModulesConfigHistory() {
+        if($this->_modules_config_history === null) {
+            $this->_modules_config_history = DModuleConfigHistoryRecord::finder()->findByModuleId($this->module_id);
+        }
+        return $this->_modules_config_history;
+    }
+
+    public function getRelationship() {
+        return $this->_relationship;
+    }
+
 
     public function delete() {
         $this->deleted = time();
@@ -611,7 +869,8 @@ class DModuleConfigBaseRecord extends FActiveRecord {
         "value"=>"text",
     );
 
-    // ONE-TO-ONE RELATIONSHIPS
+
+    // FOREIGN KEYS METHODS
     public function getModule() {
         return DModuleRecord::finder()->findByPK($this->module_id);
     }
@@ -653,7 +912,8 @@ class DModuleConfigHistoryBaseRecord extends FActiveRecord {
         "value"=>"text",
     );
 
-    // ONE-TO-ONE RELATIONSHIPS
+
+    // FOREIGN KEYS METHODS
     public function getModule() {
         return DModuleRecord::finder()->findByPK($this->module_id);
     }
@@ -709,7 +969,17 @@ class DParticipantDataBaseRecord extends FActiveRecord {
         "sex"=>"text",
     );
 
-    // ONE-TO-ONE RELATIONSHIPS
+    // RELATIONSHIPS OBJECTS
+    private $_events = null;
+    private $_relationship = null;
+
+    public function __construct($relationship = null) {
+        if($relationship !== null) {
+            $this->relationship = $relationship;
+        }
+    }
+
+    // FOREIGN KEYS METHODS
     public function getClub() {
         return DClubRecord::finder()->findByPK($this->club_id);
     }
@@ -717,6 +987,18 @@ class DParticipantDataBaseRecord extends FActiveRecord {
     public function getParticipant() {
         return DParticipantRecord::finder()->findByPK($this->participant_id);
     }
+    // RELATIONSHIPS METHODS
+    public function getEvents() {
+        if($this->_events === null) {
+            $this->_events = DEventRecord::finder()->findByParticipantDataId($this->participant_data_id);
+        }
+        return $this->_events;
+    }
+
+    public function getRelationship() {
+        return $this->_relationship;
+    }
+
 
     public function delete() {
         $this->deleted = time();
@@ -757,6 +1039,44 @@ class DParticipantBaseRecord extends FActiveRecord {
         "year"=>"integer",
     );
 
+    // RELATIONSHIPS OBJECTS
+    private $_events = null;
+    private $_participant_datas = null;
+    private $_participants_classifications = null;
+    private $_relationship = null;
+
+    public function __construct($relationship = null) {
+        if($relationship !== null) {
+            $this->relationship = $relationship;
+        }
+    }
+
+    // RELATIONSHIPS METHODS
+    public function getEvents() {
+        if($this->_events === null) {
+            $this->_events = DEventRecord::finder()->findByParticipantId($this->participant_id);
+        }
+        return $this->_events;
+    }
+
+    public function getParticipantDatas() {
+        if($this->_participant_datas === null) {
+            $this->_participant_datas = DParticipantDataRecord::finder()->findByParticipantId($this->participant_id);
+        }
+        return $this->_participant_datas;
+    }
+
+    public function getParticipantsClassifications() {
+        if($this->_participants_classifications === null) {
+            $this->_participants_classifications = DParticipantClassificationRecord::finder()->findByParticipantId($this->participant_id);
+        }
+        return $this->_participants_classifications;
+    }
+
+    public function getRelationship() {
+        return $this->_relationship;
+    }
+
 
     public function delete() {
         $this->deleted = time();
@@ -795,7 +1115,8 @@ class DParticipantClassificationBaseRecord extends FActiveRecord {
         "participant_id"=>"integer",
     );
 
-    // ONE-TO-ONE RELATIONSHIPS
+
+    // FOREIGN KEYS METHODS
     public function getClassification() {
         return DClassificationRecord::finder()->findByPK($this->classification_id);
     }
@@ -849,7 +1170,17 @@ class DPostBaseRecord extends FActiveRecord {
         "title"=>"text",
     );
 
-    // ONE-TO-ONE RELATIONSHIPS
+    // RELATIONSHIPS OBJECTS
+    private $_events = null;
+    private $_relationship = null;
+
+    public function __construct($relationship = null) {
+        if($relationship !== null) {
+            $this->relationship = $relationship;
+        }
+    }
+
+    // FOREIGN KEYS METHODS
     public function getAdmin() {
         return DAdminRecord::finder()->findByPK($this->admin_id);
     }
@@ -857,6 +1188,18 @@ class DPostBaseRecord extends FActiveRecord {
     public function getMedia() {
         return DMediaRecord::finder()->findByPK($this->thumbnail_id);
     }
+    // RELATIONSHIPS METHODS
+    public function getEvents() {
+        if($this->_events === null) {
+            $this->_events = DEventRecord::finder()->findByPostId($this->post_id);
+        }
+        return $this->_events;
+    }
+
+    public function getRelationship() {
+        return $this->_relationship;
+    }
+
 
     public function delete() {
         $this->deleted = time();
@@ -892,6 +1235,28 @@ class DPrivilegeBaseRecord extends FActiveRecord {
         "name"=>"text",
         "privilege_id"=>"integer",
     );
+
+    // RELATIONSHIPS OBJECTS
+    private $_admins_privileges = null;
+    private $_relationship = null;
+
+    public function __construct($relationship = null) {
+        if($relationship !== null) {
+            $this->relationship = $relationship;
+        }
+    }
+
+    // RELATIONSHIPS METHODS
+    public function getAdminsPrivileges() {
+        if($this->_admins_privileges === null) {
+            $this->_admins_privileges = DAdminPrivilegeRecord::finder()->findByPrivilegeId($this->privilege_id);
+        }
+        return $this->_admins_privileges;
+    }
+
+    public function getRelationship() {
+        return $this->_relationship;
+    }
 
 
     public function delete() {
@@ -937,10 +1302,32 @@ class DSupporterBaseRecord extends FActiveRecord {
         "year"=>"text",
     );
 
-    // ONE-TO-ONE RELATIONSHIPS
+    // RELATIONSHIPS OBJECTS
+    private $_events = null;
+    private $_relationship = null;
+
+    public function __construct($relationship = null) {
+        if($relationship !== null) {
+            $this->relationship = $relationship;
+        }
+    }
+
+    // FOREIGN KEYS METHODS
     public function getMedia() {
         return DMediaRecord::finder()->findByPK($this->logo_id);
     }
+    // RELATIONSHIPS METHODS
+    public function getEvents() {
+        if($this->_events === null) {
+            $this->_events = DEventRecord::finder()->findBySupporterId($this->supporter_id);
+        }
+        return $this->_events;
+    }
+
+    public function getRelationship() {
+        return $this->_relationship;
+    }
+
 
     public function delete() {
         $this->deleted = time();

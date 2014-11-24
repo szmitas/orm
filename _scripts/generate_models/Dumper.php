@@ -45,6 +45,25 @@ class Dumper {
             }
             $this->addColumn($row);
         }
+        
+        $this->setRelationships();
+    }
+    
+    protected function setRelationships(){
+        foreach ($this->tables as $table) {
+            foreach ($this->tables as $relationship_table) {
+                if ($table->name !== $relationship_table->name){
+                    if ($reference = $relationship_table->getReferenceTo($table->name)) {
+                        $relationship = new Relationship();
+                        $relationship->table = $relationship_table->name;
+                        $relationship->type = 'many-to-many';
+                        $relationship->foreign_key = $reference['column'];
+                        $table->relationship[] = $relationship;
+                        
+                    }
+                }
+            }
+        }
     }
 
     protected function addColumn($row) {

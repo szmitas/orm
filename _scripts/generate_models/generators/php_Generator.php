@@ -81,7 +81,7 @@ class php_Generator extends Generator {
             $result .= "    // RELATIONSHIPS METHODS\n";
             foreach ($table->relationships as $relationship) {
                 $function_name = Generator::firstLettersToUpper($relationship->table);
-                    $object_name = $relationship->table;
+                $object_name = $relationship->table;
                 if ($relationship->type === 'one-to-many') {
                     $active_record_name = Generator::singular($relationship->table);
                     $foreign_key_name = Generator::firstLettersToUpper($relationship->foreign_key->referenced_column);
@@ -95,7 +95,6 @@ class php_Generator extends Generator {
                 } else if ($relationship->type === 'many-to-many') {
                     $active_record_name = Generator::singular($relationship->table);
                     $foreign_key_name = mb_convert_case(Generator::singular($object_name, false), MB_CASE_LOWER, 'UTF-8') . "_id";
-                    $foreign_key_name_camel = Generator::singular($foreign_key_name);
                     $m2m_table_name = Generator::singular($relationship->source);
                     $primary_key_name = mb_convert_case(Generator::singular($table_name, false), MB_CASE_LOWER, 'UTF-8') . "_id";
                     $primary_key_name_camel = Generator::singular($primary_key_name);

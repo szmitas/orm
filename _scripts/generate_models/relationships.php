@@ -1,5 +1,5 @@
 <?php
 
-return [
-'users_privileges'    
-];
+return array(
+    'admins_privileges', 'participants_classifications',
+);

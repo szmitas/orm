@@ -48,7 +48,6 @@ try {
 //	print_r($admin_rec);
 //	$admin_rec->delete();
 //	print_r($admin_rec);
-
 } catch (Exception $e) {
     echo $e;
 }

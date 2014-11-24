@@ -42,6 +42,22 @@ class Table {
         return false;
     }
 
+    public function removeRelationship($table, $column = null) {
+        foreach ($this->relationships as $krelationship => $relationship) {
+            if ($column === null) {
+                if ($relationship->table === $table) {
+                    array_splice($this->relationships, $krelationship , 1);
+                }
+            } else {
+                // Match $column also
+            }
+        }
+    }
+    
+    public function addRelationship(Relationship $relationship) {
+        $this->relationships[] = $relationship;
+    }
+
 }
 
 class Column {
@@ -58,6 +74,7 @@ class Relationship {
 
     public $table;
     public $type;
+    public $source;
     public $foreign_key;
 
 }

@@ -48,6 +48,36 @@ class Dumper {
         }
 
         $this->setRelationships();
+        $this->fixRelationships();
+    }
+
+    protected function fixRelationships() {
+        // @TODO to be a constructor class
+        $relationship_config = require 'relationships.php';
+        foreach ($relationship_config as $table_name) {
+            $table = $this->getTable($table_name);
+            foreach ($table->columns as $column) {
+                if ($column->foreign_key) {
+                    $referenced_table = $this->getTable($column->foreign_key->referenced_table);
+                    $referenced_table->removeRelationship($table_name);
+                    $relationship = new Relationship();
+                    $relationship->source = $table_name;
+
+                    $many_refered_table='';
+                    foreach ($table->columns as $column) {
+                        if ($column->foreign_key) {
+                            if ($column->foreign_key->referenced_table !== $referenced_table){
+                                $many_refered_table = $column->foreign_key->referenced_table;
+                            }
+                        }
+                    }
+
+                    $relationship->table = $many_refered_table;
+                    $relationship->type = 'many-to-many';
+                    $referenced_table->addRelationship($relationship);
+                }
+            }
+        }
     }
 
     protected function setRelationships() {
@@ -58,7 +88,7 @@ class Dumper {
                     if ($reference) {
                         $relationship = new Relationship();
                         $relationship->table = $relationship_table->name;
-                        $relationship->type = 'many-to-many';
+                        $relationship->type = 'one-to-many';
                         $relationship->foreign_key = $reference['foreign_key'];
                         $table->relationships[] = $relationship;
                     }

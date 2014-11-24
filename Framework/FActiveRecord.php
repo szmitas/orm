@@ -6,8 +6,9 @@ class FActiveRecord extends FPDO {
     private $_record = false;
 
     public function __construct() {
-        $database = FHttpSession::getValue(FHttpSession::CUSTOMER_DATABASE) ? FHttpSession::getValue(FHttpSession::CUSTOMER_DATABASE) : DB_NAME;
-        $connection = FDbConnection::instance(DB_TYPE,DB_HOST, $database, DB_USER, DB_PASSWORD, DB_CHARSET, DB_COLLATE);
+        global $repel_db_config;
+
+        $connection = FDbConnection::instance($repel_db_config['driver'], $repel_db_config['username'], $repel_db_config['password']);
         $this->PDO = $connection->PDOInstance;
     }
 

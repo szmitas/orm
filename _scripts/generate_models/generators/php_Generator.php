@@ -66,6 +66,7 @@ class php_Generator extends Generator {
                 break;
             }
         }
+        $result.="}\n";
 
         // @todo ogarnąć
         $result .= "\n\nclass D{$table_name}Record extends D{$table_name}BaseRecord {";
@@ -176,8 +177,10 @@ class php_Generator extends Generator {
 
     public function generateFindByFunction($column) {
         $function_name = Generator::firstLettersToUpper($column->name);
+        $active_record_name = Generator::singular($this->table_name);
+
         $result = "\tpublic function findBy{$function_name}(\${$column->name}) {\n";
-        $result .= "\t\treturn self::finder()->find(\"{$column->name} = :{$column->name}\", array(\":{$column->name}\" => \${$column->name}));\n";
+        $result .= "\t\treturn D{$active_record_name}Record::finder()->find(\"{$column->name} = :{$column->name}\", array(\":{$column->name}\" => \${$column->name}));\n";
         $result .= "\t}\n\n";
 
         if (substr($column->name, strlen($column->name) - 3) === "_id") {
@@ -212,7 +215,6 @@ class php_Generator extends Generator {
             $result .= "\t\tthrow new Exception('Cannot delete a view record.');\n";
             $result .= "\t}\n";
         }
-        $result.="}\n";
 
         return $result;
     }

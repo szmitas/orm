@@ -58,7 +58,7 @@ class FActiveRecord extends FPDO {
         }
     }
 
-    public function findByPk($key) {
+    public function findByPK($key) {
         $primary_key = $this->camelize_name($this->TABLE) . "_id";
 
         $criteria = new FActiveRecordCriteria();
@@ -68,7 +68,7 @@ class FActiveRecord extends FPDO {
         return $this->find($criteria);
     }
 
-    public function findAllByPks($keys) {
+    public function findAllByPKs($keys) {
         $primary_key = $this->camelize_name($this->TABLE) . "_id";
 
         $criteria = new FActiveRecordCriteria();

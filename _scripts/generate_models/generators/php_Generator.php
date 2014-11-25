@@ -185,6 +185,16 @@ class php_Generator extends Generator {
 
         if (substr($column->name, strlen($column->name) - 3) === "_id") {
             $result .= "\tpublic function findBy{$function_name}s(array \$ids) {\n";
+            $result .= "\t\t\$i = 0;\n";
+            $result .= "\t\t\$parameters = array();\n";
+            $result .= "\t\t\$in_values = \"\";\n";
+            $result .= "\t\tforeach (\$ids as \$id) {\n";
+            $result .= "\t\t\t\$in_values .= \":id{\$i}, \";\n";
+            $result .= "\t\t\t\$parameters[\":id{\$i}\"] = \$id;\n";
+            $result .= "\t\t\t\$i++;\n";
+            $result .= "\t\t}\n";
+            $result .= "\t\t\$in_values = substr(\$in_values, 0, strlen(\$in_values) - 2);\n";
+            $result .= "\t\treturn D{$active_record_name}Record::finder()->find(\"{$column->name} IN ({\$in_values})\", \$parameters);\n";
             $result .= "\t}\n\n";
         }
         return $result;

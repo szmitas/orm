@@ -43,6 +43,10 @@ class php_Generator extends Generator {
             $result .= $this->generateRelationshipMethods($table->relationships);
 
             if ($this->cross_reference) {
+                $result .= "\tpublic function setRelationship(\$relationship) {\n";
+                $result .= "\t\treturn \$this->_relationship = \$relationship;\n";
+                $result .= "\t}\n";
+                 $result .= "\n";
                 $result .= "\tpublic function getRelationship() {\n";
                 $result .= "\t\treturn \$this->_relationship;\n";
                 $result .= "\t}\n";
@@ -53,6 +57,10 @@ class php_Generator extends Generator {
 
         foreach ($table->columns as $column) {
             $result .= $this->generateFindByFunction($column);
+        }
+
+        foreach ($table->columns as $column) {
+            $result .= $this->generateFindOneByFunction($column);
         }
 
         foreach ($table->columns as $column) {
@@ -142,8 +150,8 @@ class php_Generator extends Generator {
         $result = "\t// relationship methods\n";
         foreach ($relationships as $relationship) {
             $function_name = Generator::firstLettersToUpper($relationship->table);
-            $object_name = $relationship->table;
             $active_record_name = Generator::singular($relationship->table);
+            $object_name = $relationship->table;
             if ($relationship->type === 'one-to-many') {
                 $foreign_key_name = Generator::firstLettersToUpper($relationship->foreign_key->referenced_column);
 
@@ -154,7 +162,7 @@ class php_Generator extends Generator {
                 $result .= "\t\treturn \$this->_{$object_name};\n";
                 $result .= "\t\t}\n\n";
             } else if ($relationship->type === 'many-to-many') {
-                $foreign_key_name = mb_convert_case(Generator::singular($object_name, false), MB_CASE_LOWER, 'UTF-8') . "_id";
+                $foreign_key_name = mb_convert_case(Generator::singular($object_name), MB_CASE_LOWER, 'UTF-8') . "_id";
                 $m2m_table_name = Generator::singular($relationship->source);
                 $primary_key_name = mb_convert_case(Generator::singular($this->table_name, false), MB_CASE_LOWER, 'UTF-8') . "_id";
                 $primary_key_name_camel = Generator::singular($primary_key_name);
@@ -166,7 +174,16 @@ class php_Generator extends Generator {
                 $result .= "\t\t\tforeach(\${$relationship->source} as \${$relationship->source[0]}) {\n";
                 $result .= "\t\t\t\t\${$relationship->table}_pks[] = \${$relationship->source[0]}->{$foreign_key_name};\n";
                 $result .= "\t\t\t}\n";
-                $result .= "\t\t\$this->_{$relationship->table} = D{$active_record_name}Record::finder()->findByPKs(implode(',',\${$relationship->table}_pks));\n";
+                $result .= "\t\t\t\$this->_{$relationship->table} = D{$active_record_name}Record::finder()->findByPKs(\${$relationship->table}_pks);\n";
+                $result .= "\t\t\tforeach(\$this->_{$relationship->table} as \${$relationship->table[0]}) {\n";
+                $result .= "\t\t\t\tforeach(\${$relationship->source} as \${$relationship->source[0]}) {\n";
+                $result .= "\t\t\t\t\tif(\${$relationship->table[0]}->{$foreign_key_name} === \${$relationship->source[0]}->{$foreign_key_name}) {\n";
+                $result .= "\t\t\t\t\t\t\${$relationship->table[0]}->setRelationship(\${$relationship->source[0]});\n";
+                $result .= "\t\t\t\t\t\tunset(\${$relationship->source[0]});\n";
+                $result .= "\t\t\t\t\t\tbreak;\n";
+                $result .= "\t\t\t\t\t}\n";
+                $result .= "\t\t\t\t}\n";
+                $result .= "\t\t\t}\n";
                 $result .= "\t\t}\n";
                 $result .= "\t\treturn \$this->_{$object_name};\n";
                 $result .= "\t}\n\n";
@@ -197,6 +214,16 @@ class php_Generator extends Generator {
             $result .= "\t\treturn D{$active_record_name}Record::finder()->find(\"{$column->name} IN ({\$in_values})\", \$parameters);\n";
             $result .= "\t}\n\n";
         }
+        return $result;
+    }
+
+    public function generateFindOneByFunction($column) {
+        $function_name = Generator::firstLettersToUpper($column->name);
+        $active_record_name = Generator::singular($this->table_name);
+
+        $result = "\tpublic function findOneBy{$function_name}(\${$column->name}) {\n";
+        $result .= "\t\treturn D{$active_record_name}Record::finder()->findOne(\"{$column->name} = :{$column->name}\", array(\":{$column->name}\" => \${$column->name}));\n";
+        $result .= "\t}\n\n";
         return $result;
     }
 

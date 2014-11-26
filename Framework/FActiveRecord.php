@@ -58,33 +58,37 @@ class FActiveRecord extends FPDO {
         }
     }
 
-    public function findByPk($key) {
+    public function findByPK($key) {
         $primary_key = $this->camelize_name($this->TABLE) . "_id";
 
         $criteria = new FActiveRecordCriteria();
         $criteria->Condition = $primary_key . " = :" . $primary_key;
         $criteria->Parameters[$primary_key] = $key;
 
-        return $this->find($criteria);
+        return $this->findOne($criteria);
     }
 
-    public function findAllByPks($keys) {
-        $primary_key = $this->camelize_name($this->TABLE) . "_id";
+    public function findByPKs($keys) {
+        if (count($keys)) {
+            $primary_key = $this->camelize_name($this->TABLE) . "_id";
 
-        $criteria = new FActiveRecordCriteria();
+            $criteria = new FActiveRecordCriteria();
 
-        $i = 0;
-        $in_values = "";
+            $i = 0;
+            $in_values = "";
 
-        foreach ($keys as $key) {
-            $in_values .= ":" . $primary_key . $i . ", ";
-            $criteria->Parameters[":" . $primary_key . $i] = $key;
-            $i++;
+            foreach ($keys as $key) {
+                $in_values .= ":" . $primary_key . $i . ", ";
+                $criteria->Parameters[":" . $primary_key . $i] = $key;
+                $i++;
+            }
+
+            $criteria->Condition = $primary_key . " IN ( " . substr($in_values, 0, strlen($in_values) - 2) . " )";
+
+            return $this->find($criteria);
+        } else {
+            return array();
         }
-
-        $criteria->Condition = $primary_key . " IN( " . substr($in_values, 0, strlen($in_values) - 2) . " )";
-
-        return $this->findAll($criteria);
     }
 
     public function findBySql($statement, $criteria = null) {
@@ -93,7 +97,7 @@ class FActiveRecord extends FPDO {
         }
     }
 
-    public function find($criteria = null, $parameters = array()) {
+    public function findOne($criteria = null, $parameters = array()) {
         $statement = "SELECT * FROM " . $this->TABLE;
 
         if (!$criteria instanceof FActiveRecordCriteria) {
@@ -105,7 +109,7 @@ class FActiveRecord extends FPDO {
         return $this->execute($statement, $criteria, $parameters);
     }
 
-    public function findAll($criteria = null, $parameters = array()) {
+    public function find($criteria = null, $parameters = array()) {
         $statement = "SELECT * FROM " . $this->TABLE;
 
         if (!$criteria instanceof FActiveRecordCriteria) {

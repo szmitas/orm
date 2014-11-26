@@ -63,10 +63,10 @@ class Dumper {
                     $relationship = new Relationship();
                     $relationship->source = $table_name;
 
-                    $many_refered_table='';
+                    $many_refered_table = '';
                     foreach ($table->columns as $column) {
                         if ($column->foreign_key) {
-                            if ($column->foreign_key->referenced_table !== $referenced_table){
+                            if ($column->foreign_key->referenced_table !== $referenced_table->name) {
                                 $many_refered_table = $column->foreign_key->referenced_table;
                             }
                         }

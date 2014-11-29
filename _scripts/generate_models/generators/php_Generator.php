@@ -7,13 +7,15 @@ class php_Generator extends Generator {
     private $cross_reference = false;
 
     public function generate($table) {
-        $table_name = $this->singular($table->name);
-        $table_name[0] = strtoupper($table_name[0]);
+        $table_name = Generator::singular($table->name);
+        $table_name = Generator::firstLettersToUpper($table_name);
         $this->table_name = $table_name;
 
-        $result = "class D{$table_name}BaseRecord extends FActiveRecord {\n\n";
+        $result = "class D{$table_name}Base extends FActiveRecord {\n\n";
         $result.= "\tpublic \$TABLE = \"{$table->name}\";\n\n";
 
+      
+        
         $result .= $this->generateObjectProperties($table->columns);
         $result.="\n";
 
@@ -52,40 +54,22 @@ class php_Generator extends Generator {
                 $result .= "\t}\n";
             }
         }
-        $result .= "\n";
-        $result .= "\t// finders and filters\n";
-
-        foreach ($table->columns as $column) {
-            $result .= $this->generateFindByFunction($column);
-        }
-
-        foreach ($table->columns as $column) {
-            $result .= $this->generateFindOneByFunction($column);
-        }
-
-        foreach ($table->columns as $column) {
-            $result .= $this->generateFilterByFunction($column);
-        }
-
-        $result .= "\t// others\n";
-        foreach ($table->columns as $column) {
-            if ($column->name === "deleted") {
-                $result .= $this->generateDeleteFunction($table->type);
-                break;
-            }
-        }
-        $result.="}\n";
+        
+        $result.="}\n\n";
+        
+        $result .= $this->generateQuery($table);
 
         // @todo ogarnąć
-        $result .= "\n\nclass D{$table_name}Record extends D{$table_name}BaseRecord {";
-        $result .= "\n\n\tpublic static function finder() {";
-        $result .= "\n\t\treturn new self ();";
-        $result .= "\n\t}";
+        $result .= "\n\nclass D{$table_name} extends D{$table_name}Base {";
         $result .= "\n\n\tpublic function save() {";
         $result .= "\n\t\treturn parent::save();";
         $result .= "\n\t}";
         $result .= "\n\n}\n\n";
 
+          // @todo ogarnąć
+        $result .= "\n\nclass D{$table_name}Query extends D{$table_name}BaseQuery {";
+        $result .= "\n\n}\n\n";
+        
         return $result;
     }
 
@@ -139,7 +123,7 @@ class php_Generator extends Generator {
 
             $result .= "\tpublic function get{$object_name}() {\n";
             $result .= "\t\tif(\$this->_{$class_name} === null) {\n";
-            $result .= "\t\t\t\$this->_{$class_name} = D{$object_name}Record::finder()->findByPK(\$this->{$name});\n";
+            $result .= "\t\t\t\$this->_{$class_name} = D{$object_name}::finder()->findByPK(\$this->{$name});\n";
             $result .= "\t\t}\n";
             $result .= "\t\treturn \$this->_{$class_name};\n";
             $result .= "\t}\n";
@@ -157,7 +141,7 @@ class php_Generator extends Generator {
 
                 $result .= "\tpublic function get{$function_name}() {\n";
                 $result .= "\t\tif(\$this->_{$object_name} === null) {\n";
-                $result .= "\t\t\t\$this->_{$object_name} = D{$active_record_name}Record::finder()->findBy{$foreign_key_name}(\$this->{$relationship->foreign_key->referenced_column});\n";
+                $result .= "\t\t\t\$this->_{$object_name} = D{$active_record_name}::finder()->findBy{$foreign_key_name}(\$this->{$relationship->foreign_key->referenced_column});\n";
                 $result .= "\t\t}\n";
                 $result .= "\t\treturn \$this->_{$object_name};\n";
                 $result .= "\t\t}\n\n";
@@ -169,12 +153,12 @@ class php_Generator extends Generator {
 
                 $result .= "\tpublic function get{$function_name}() {\n";
                 $result .= "\t\tif(\$this->_{$object_name} === null) {\n";
-                $result .= "\t\t\t\${$relationship->source} = D{$m2m_table_name}Record::finder()->findBy{$primary_key_name_camel}(\$this->{$primary_key_name});\n";
+                $result .= "\t\t\t\${$relationship->source} = D{$m2m_table_name}::finder()->findBy{$primary_key_name_camel}(\$this->{$primary_key_name});\n";
                 $result .= "\t\t\t\${$relationship->table}_pks = array();\n";
                 $result .= "\t\t\tforeach(\${$relationship->source} as \${$relationship->source[0]}) {\n";
                 $result .= "\t\t\t\t\${$relationship->table}_pks[] = \${$relationship->source[0]}->{$foreign_key_name};\n";
                 $result .= "\t\t\t}\n";
-                $result .= "\t\t\t\$this->_{$relationship->table} = D{$active_record_name}Record::finder()->findByPKs(\${$relationship->table}_pks);\n";
+                $result .= "\t\t\t\$this->_{$relationship->table} = D{$active_record_name}::finder()->findByPKs(\${$relationship->table}_pks);\n";
                 $result .= "\t\t\tforeach(\$this->_{$relationship->table} as \${$relationship->table[0]}) {\n";
                 $result .= "\t\t\t\tforeach(\${$relationship->source} as \${$relationship->source[0]}) {\n";
                 $result .= "\t\t\t\t\tif(\${$relationship->table[0]}->{$foreign_key_name} === \${$relationship->source[0]}->{$foreign_key_name}) {\n";
@@ -197,7 +181,7 @@ class php_Generator extends Generator {
         $active_record_name = Generator::singular($this->table_name);
 
         $result = "\tpublic function findBy{$function_name}(\${$column->name}) {\n";
-        $result .= "\t\treturn D{$active_record_name}Record::finder()->find(\"{$column->name} = :{$column->name}\", array(\":{$column->name}\" => \${$column->name}));\n";
+        $result .= "\t\treturn D{$active_record_name}::finder()->find(\"{$column->name} = :{$column->name}\", array(\":{$column->name}\" => \${$column->name}));\n";
         $result .= "\t}\n\n";
 
         if (substr($column->name, strlen($column->name) - 3) === "_id") {
@@ -211,7 +195,7 @@ class php_Generator extends Generator {
             $result .= "\t\t\t\$i++;\n";
             $result .= "\t\t}\n";
             $result .= "\t\t\$in_values = substr(\$in_values, 0, strlen(\$in_values) - 2);\n";
-            $result .= "\t\treturn D{$active_record_name}Record::finder()->find(\"{$column->name} IN ({\$in_values})\", \$parameters);\n";
+            $result .= "\t\treturn D{$active_record_name}::finder()->find(\"{$column->name} IN ({\$in_values})\", \$parameters);\n";
             $result .= "\t}\n\n";
         }
         return $result;
@@ -222,7 +206,7 @@ class php_Generator extends Generator {
         $active_record_name = Generator::singular($this->table_name);
 
         $result = "\tpublic function findOneBy{$function_name}(\${$column->name}) {\n";
-        $result .= "\t\treturn D{$active_record_name}Record::finder()->findOne(\"{$column->name} = :{$column->name}\", array(\":{$column->name}\" => \${$column->name}));\n";
+        $result .= "\t\treturn D{$active_record_name}::finder()->findOne(\"{$column->name} = :{$column->name}\", array(\":{$column->name}\" => \${$column->name}));\n";
         $result .= "\t}\n\n";
         return $result;
     }
@@ -254,6 +238,42 @@ class php_Generator extends Generator {
         }
 
         return $result;
+    }
+    
+    protected function generateQuery($table) {
+        $query ='';
+        $table_name = Generator::singular($table->name);
+        $table_name = Generator::firstLettersToUpper($table_name);
+        $this->table_name = $table_name;
+
+        $query = "class D{$table_name}BaseQuery extends FActiveQuery {\n\n";
+        
+        
+        $query .= $this->generateColumnTypesArray($table->columns);
+        $query.="\n";
+
+
+        foreach ($table->columns as $column) {
+            $query .= $this->generateFindByFunction($column);
+        }
+
+        foreach ($table->columns as $column) {
+            $query .= $this->generateFindOneByFunction($column);
+        }
+
+        foreach ($table->columns as $column) {
+            $query .= $this->generateFilterByFunction($column);
+        }
+
+        $query .= "\t// others\n";
+        foreach ($table->columns as $column) {
+            if ($column->name === "deleted") {
+                $query .= $this->generateDeleteFunction($table->type);
+                break;
+            }
+        }
+        $query.= "}\n";
+        return $query;
     }
 
 }

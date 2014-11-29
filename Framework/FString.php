@@ -19,4 +19,28 @@ class FString {
         return $string;
     }
 
+    public static function camelize_name($name) {
+        // delete -ies
+        if (substr($name, strlen($name) - 3) == "ies") {
+            $name = substr($name, 0, strlen($name) - 3);
+            $name .= "y";
+        }
+        // delete -s
+        if ($name[strlen($name) - 1] == "s") {
+            $name = substr($name, 0, strlen($name) - 1);
+        }
+
+        while (substr_count($name, "ies_")) {
+            $index = strpos($name, "ies_");
+            $name = FString::replace_limit("ies_", "y_", $name);
+        }
+
+        while (substr_count($name, "s_")) {
+            $index = strpos($name, "s_");
+            $name = FString::replace_limit("s_", "_", $name);
+        }
+
+        return $name;
+    }
+
 }

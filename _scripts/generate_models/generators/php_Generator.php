@@ -8,14 +8,13 @@ class php_Generator extends Generator {
 
     public function generate($table) {
         $table_name = Generator::singular($table->name);
-        $table_name = Generator::firstLettersToUpper($table_name);
         $this->table_name = $table_name;
 
         $result = "class D{$table_name}Base extends FActiveRecord {\n\n";
         $result.= "\tpublic \$TABLE = \"{$table->name}\";\n\n";
 
-      
-        
+
+
         $result .= $this->generateObjectProperties($table->columns);
         $result.="\n";
 
@@ -48,15 +47,15 @@ class php_Generator extends Generator {
                 $result .= "\tpublic function setRelationship(\$relationship) {\n";
                 $result .= "\t\treturn \$this->_relationship = \$relationship;\n";
                 $result .= "\t}\n";
-                 $result .= "\n";
+                $result .= "\n";
                 $result .= "\tpublic function getRelationship() {\n";
                 $result .= "\t\treturn \$this->_relationship;\n";
                 $result .= "\t}\n";
             }
         }
-        
+
         $result.="}\n\n";
-        
+
         $result .= $this->generateQuery($table);
 
         // @todo ogarnąć
@@ -66,10 +65,10 @@ class php_Generator extends Generator {
         $result .= "\n\t}";
         $result .= "\n\n}\n\n";
 
-          // @todo ogarnąć
+        // @todo ogarnąć
         $result .= "\n\nclass D{$table_name}Query extends D{$table_name}BaseQuery {";
         $result .= "\n\n}\n\n";
-        
+
         return $result;
     }
 
@@ -239,16 +238,15 @@ class php_Generator extends Generator {
 
         return $result;
     }
-    
+
     protected function generateQuery($table) {
-        $query ='';
+        $query = '';
         $table_name = Generator::singular($table->name);
-        $table_name = Generator::firstLettersToUpper($table_name);
         $this->table_name = $table_name;
 
         $query = "class D{$table_name}BaseQuery extends FActiveQuery {\n\n";
-        
-        
+
+
         $query .= $this->generateColumnTypesArray($table->columns);
         $query.="\n";
 

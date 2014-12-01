@@ -169,16 +169,7 @@ class FActiveQuery extends FPDO{
         $primary_key = FString::camelize_name($this->TABLE) . "_id";
 
         foreach ($params as $key => &$value) {
-            if (array_key_exists(str_replace(":", "", $key), $this->TYPES)) {
-                $type = $this->TYPES[str_replace(":", "", $key)];
-            } else {
-                if (in_array($key, array(":results_limit", ":results_offset")) || strpos($primary_key, $key) == 0) {
-                    $type = "int";
-                } else {
-                    $type = "string";
-                }
-            }
-            $st->bindParam($key, $value, $type === "string" ? PDO::PARAM_STR : PDO::PARAM_INT );
+            $st->bindParam($key, $value, PDO::PARAM_STR );
         }
 
         if (!$st->execute()) {

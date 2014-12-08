@@ -1,4 +1,5 @@
 <?php
+namespace Repel\Includes;
 
 define('red','red');
 define('black','black');

@@ -1,5 +1,5 @@
 <?php
-
+namespace Repel\Framework;
 class FString {
 
     public static function replace_limit($search, $replace, $string, $limit = 1) {

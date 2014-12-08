@@ -1,13 +1,17 @@
 <?php
 
-class php_Generator extends Generator {
+namespace Repel\Adapter\Generator;
 
-    private $table_name = "";
-    private $foreign_keys = array();
-    private $cross_reference = false;
+use Repel\Adapter\Generator\BaseGenerator;
+
+class phpGenerator extends BaseGenerator {
+
+    protected $table_name = "";
+    protected $foreign_keys = array();
+    protected $cross_reference = false;
 
     public function generate($table) {
-        $table_name = Generator::singular($table->name);
+        $table_name = BaseGenerator::singular($table->name);
         $this->table_name = $table_name;
 
         $result = "class D{$table_name}Base extends FActiveRecord {\n\n";
@@ -95,7 +99,7 @@ class php_Generator extends Generator {
     public function generateForeignKeyObjects() {
         $result = "\t// foreign key objects\n";
         foreach ($this->foreign_keys as $name => $fk) {
-            $object_name = mb_convert_case(Generator::singular(substr($name, 0, strlen($name) - 3), false), MB_CASE_LOWER, 'UTF-8');
+            $object_name = mb_convert_case(BaseGenerator::singular(substr($name, 0, strlen($name) - 3), false), MB_CASE_LOWER, 'UTF-8');
             $result .= "\tprivate \$_{$object_name} = null;\n";
         }
         return $result;
@@ -117,8 +121,8 @@ class php_Generator extends Generator {
     public function generateForeignKeyMethods() {
         $result = "\t// foreign key methods";
         foreach ($this->foreign_keys as $name => $fk) {
-            $object_name = Generator::singular($fk->referenced_table);
-            $class_name = mb_convert_case(Generator::singular($fk->referenced_table, false), MB_CASE_LOWER, 'UTF-8');
+            $object_name = BaseGenerator::singular($fk->referenced_table);
+            $class_name = mb_convert_case(BaseGenerator::singular($fk->referenced_table, false), MB_CASE_LOWER, 'UTF-8');
 
             $result .= "\tpublic function get{$object_name}() {\n";
             $result .= "\t\tif(\$this->_{$class_name} === null) {\n";
@@ -132,11 +136,11 @@ class php_Generator extends Generator {
     public function generateRelationshipMethods($relationships) {
         $result = "\t// relationship methods\n";
         foreach ($relationships as $relationship) {
-            $function_name = Generator::firstLettersToUpper($relationship->table);
-            $active_record_name = Generator::singular($relationship->table);
+            $function_name = BaseGenerator::firstLettersToUpper($relationship->table);
+            $active_record_name = BaseGenerator::singular($relationship->table);
             $object_name = $relationship->table;
             if ($relationship->type === 'one-to-many') {
-                $foreign_key_name = Generator::firstLettersToUpper($relationship->foreign_key->referenced_column);
+                $foreign_key_name = BaseGenerator::firstLettersToUpper($relationship->foreign_key->referenced_column);
 
                 $result .= "\tpublic function get{$function_name}() {\n";
                 $result .= "\t\tif(\$this->_{$object_name} === null) {\n";
@@ -145,10 +149,10 @@ class php_Generator extends Generator {
                 $result .= "\t\treturn \$this->_{$object_name};\n";
                 $result .= "\t\t}\n\n";
             } else if ($relationship->type === 'many-to-many') {
-                $foreign_key_name = mb_convert_case(Generator::singular($object_name), MB_CASE_LOWER, 'UTF-8') . "_id";
-                $m2m_table_name = Generator::singular($relationship->source);
-                $primary_key_name = mb_convert_case(Generator::singular($this->table_name, false), MB_CASE_LOWER, 'UTF-8') . "_id";
-                $primary_key_name_camel = Generator::singular($primary_key_name);
+                $foreign_key_name = mb_convert_case(BaseGenerator::singular($object_name), MB_CASE_LOWER, 'UTF-8') . "_id";
+                $m2m_table_name = BaseGenerator::singular($relationship->source);
+                $primary_key_name = mb_convert_case(BaseGenerator::singular($this->table_name, false), MB_CASE_LOWER, 'UTF-8') . "_id";
+                $primary_key_name_camel = BaseGenerator::singular($primary_key_name);
 
                 $result .= "\tpublic function get{$function_name}() {\n";
                 $result .= "\t\tif(\$this->_{$object_name} === null) {\n";
@@ -176,8 +180,8 @@ class php_Generator extends Generator {
     }
 
     public function generateFindByFunction($column) {
-        $function_name = Generator::firstLettersToUpper($column->name);
-        $active_record_name = Generator::singular($this->table_name);
+        $function_name = BaseGenerator::firstLettersToUpper($column->name);
+        $active_record_name = BaseGenerator::singular($this->table_name);
 
         $result = "\tpublic function findBy{$function_name}(\${$column->name}) {\n";
         $result .= "\t\treturn D{$active_record_name}::finder()->find(\"{$column->name} = :{$column->name}\", array(\":{$column->name}\" => \${$column->name}));\n";
@@ -201,8 +205,8 @@ class php_Generator extends Generator {
     }
 
     public function generateFindOneByFunction($column) {
-        $function_name = Generator::firstLettersToUpper($column->name);
-        $active_record_name = Generator::singular($this->table_name);
+        $function_name = BaseGenerator::firstLettersToUpper($column->name);
+        $active_record_name = BaseGenerator::singular($this->table_name);
 
         $result = "\tpublic function findOneBy{$function_name}(\${$column->name}) {\n";
         $result .= "\t\treturn D{$active_record_name}::finder()->findOne(\"{$column->name} = :{$column->name}\", array(\":{$column->name}\" => \${$column->name}));\n";
@@ -211,7 +215,7 @@ class php_Generator extends Generator {
     }
 
     public function generateFilterByFunction($column) {
-        $function_name = Generator::firstLettersToUpper($column->name);
+        $function_name = BaseGenerator::firstLettersToUpper($column->name);
         $result = "\tpublic function filterBy{$function_name}(\${$column->name}) {\n";
         $result .= "\t}\n\n";
 
@@ -241,7 +245,7 @@ class php_Generator extends Generator {
 
     protected function generateQuery($table) {
         $query = '';
-        $table_name = Generator::singular($table->name);
+        $table_name = BaseGenerator::singular($table->name);
         $this->table_name = $table_name;
 
         $query = "class D{$table_name}BaseQuery extends FActiveQuery {\n\n";

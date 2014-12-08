@@ -1,5 +1,6 @@
 <?php
-namespace Repel;
+namespace Repel\Framework;
+
 class FActiveQuery extends FPDO{
 
     protected $PDO;

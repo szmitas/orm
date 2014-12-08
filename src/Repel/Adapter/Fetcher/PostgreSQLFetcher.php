@@ -1,6 +1,10 @@
 <?php
 
-class PostgreSQL_Fetcher implements Fetcher {
+namespace Repel\Adapter\Fetcher;
+
+use Repel\Adapter\Fetcher\BaseFetcher;
+
+class PostgreSQLFetcher implements BaseFetcher {
 
     /**
      * 

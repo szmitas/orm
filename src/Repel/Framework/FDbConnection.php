@@ -1,5 +1,5 @@
 <?php
-
+namespace Repel\Framework;
 class FDbConnection {
 
     private static $singleton;

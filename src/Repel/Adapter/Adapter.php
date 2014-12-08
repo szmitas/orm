@@ -1,6 +1,17 @@
 <?php
 
-class Dumper {
+namespace Repel\Adapter;
+
+use Repel\Adapter\Fetcher;
+use Repel\Includes\CLI;
+use Repel\Adapter\Generator;
+use Repel\Adapter\RelationClasses\Table;
+use Repel\Adapter\RelationClasses\Relationship;
+use Repel\Adapter\RelationClasses\ForeignKey;
+use Repel\Adapter\RelationClasses\Column;
+
+
+class Adapter {
 
     protected $db;
     protected $config;
@@ -19,7 +30,7 @@ class Dumper {
     }
 
     public function connect() {
-        $this->db = new PDO($this->config ['driver'], $this->config ['username'], $this->config ['password']);
+        $this->db = new \PDO($this->config ['driver'], $this->config ['username'], $this->config ['password']);
     }
 
     /**
@@ -35,7 +46,7 @@ class Dumper {
         } else {
             // Automatic fetcher recognition
             if ($this->config['type'] === 'pgsql') {
-                $fetcher = new PostgreSQL_Fetcher($this->db, $this->config['public_schema']);
+                $fetcher = new Fetcher\PostgreSQLFetcher($this->db, $this->config['public_schema']);
             }
         }
         $rows = $fetcher->fetch();
@@ -53,7 +64,7 @@ class Dumper {
 
     protected function fixRelationships() {
         // @TODO to be a constructor class
-        $relationship_config = require 'relationships.php';
+        $relationship_config = require __DIR__.'/../../../relationships.php';
         foreach ($relationship_config as $table_name) {
             $table = $this->getTable($table_name);
             foreach ($table->columns as $column) {
@@ -154,12 +165,12 @@ class Dumper {
 
     public function generate($table) {
 
-        $table_name = Generator::singular($table->name);
+        $table_name = Generator\BaseGenerator::singular($table->name);
         $table_name[0] = strtoupper($table_name[0]);
 
         echo CLI::dotFill($table_name . ' (' . CLI::color($table->type, dark_gray) . ')', DOT_FILL + 11);
 
-        $generator = new php_Generator();
+        $generator = new Generator\phpGenerator();
         $result = $generator->generate($table);
 
         echo CLI::color("saved", green) . "\n";

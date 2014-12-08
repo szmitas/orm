@@ -1,5 +1,5 @@
 <?php
-
+namespace Repel\Framework;
 class FComponent {
 	
 	public function __set( $name, $value ) {

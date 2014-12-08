@@ -1,5 +1,5 @@
 <?php
-
+namespace Repel\Framework;
 class FActiveRecordCriteria extends FComponent {
 
     public $condition;

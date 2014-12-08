@@ -1,5 +1,5 @@
 <?php
-
+namespace Repel\Framework;
 class FActiveRecord extends FPDO {
 
     private $PDO;

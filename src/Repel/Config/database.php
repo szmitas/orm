@@ -1,5 +1,4 @@
 <?php
-
 return array(
     'driver' => 'pgsql:dbname=test;host=localhost',
     'type' => 'pgsql',

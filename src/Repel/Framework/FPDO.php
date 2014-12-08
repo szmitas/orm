@@ -1,6 +1,6 @@
 <?php
-
-class FPDO extends PDO {
+namespace Repel\Framework;
+class FPDO extends \PDO {
 
     // Database drivers that support SAVEPOINTs.
     protected static $savepointTransactions = array("pgsql", "mysql");

@@ -1,6 +1,7 @@
 <?php
 
 try {
+    require_once 'autoloader.php';
     require_once __DIR__ . '/Config/config.php';
     require_once __DIR__ . '/_scripts/maciej2.php';
     echo "<html>";

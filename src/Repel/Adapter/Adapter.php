@@ -10,6 +10,8 @@ use Repel\Adapter\RelationClasses\Relationship;
 use Repel\Adapter\RelationClasses\ForeignKey;
 use Repel\Adapter\RelationClasses\Column;
 
+const DOT_FILL = 36;
+const HEADER_FILL = 38;
 
 class Adapter {
 
@@ -19,6 +21,8 @@ class Adapter {
     protected $tables = array();
 
     public function __construct($config) {
+
+        echo CLI::h1('Repel adapter', HEADER_FILL);
         switch ($config['type']) {
             case 'pgsql':
                 $this->config = $config;
@@ -30,9 +34,15 @@ class Adapter {
     }
 
     public function connect() {
+        echo CLI::dotFill('connecting', DOT_FILL);
         $this->db = new \PDO($this->config ['driver'], $this->config ['username'], $this->config ['password']);
+        echo CLI::color("done", green) . "\n";
     }
 
+    public function addFetcher(){
+        echo 'addFetcher';
+        return $this;
+    }
     /**
      * Fetch structure from database.
      * 
@@ -40,6 +50,7 @@ class Adapter {
      * @param Fetcher $custom_fetcher
      */
     public function fetch($custom_fetcher = null) {
+        echo CLI::dotFill('fetching structure', DOT_FILL);
 
         if ($custom_fetcher instanceof Fetcher) {
             $fetcher = $custom_fetcher;
@@ -60,11 +71,13 @@ class Adapter {
 
         $this->setRelationships();
         $this->fixRelationships();
+        echo CLI::color("done", green) . "\n";
+        return $this;
     }
 
     protected function fixRelationships() {
         // @TODO to be a constructor class
-        $relationship_config = require __DIR__.'/../../../relationships.php';
+        $relationship_config = require __DIR__ . '/../../../relationships.php';
         foreach ($relationship_config as $table_name) {
             $table = $this->getTable($table_name);
             foreach ($table->columns as $column) {
@@ -179,6 +192,7 @@ class Adapter {
     }
 
     public function save() {
+        echo CLI::h1('saving models', HEADER_FILL);
         $file = $this->config['model_file_path'];
 
         $file_handle = fopen($file, 'w');
@@ -188,6 +202,7 @@ class Adapter {
             fwrite($file_handle, $this->generate($table));
         }
         fclose($file_handle);
+        echo CLI::success();
     }
 
 }

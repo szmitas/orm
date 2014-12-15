@@ -2,7 +2,7 @@
 
 namespace Repel\Adapter\Fetcher;
 
-interface BaseFetcher {
+interface FetcherInterface {
 
     public function fetch();
 }

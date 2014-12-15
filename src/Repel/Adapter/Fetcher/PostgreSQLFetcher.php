@@ -2,17 +2,19 @@
 
 namespace Repel\Adapter\Fetcher;
 
-use Repel\Adapter\Fetcher\BaseFetcher;
+use Repel\Adapter\Fetcher\FetcherInterface;
 
-class PostgreSQLFetcher implements BaseFetcher {
+class PostgreSQLFetcher implements FetcherInterface {
 
     /**
      * 
      * @param type $db PDO handle to database connection
      * @param type $schema Fetch target
      */
-    public function __construct($db, $schema = 'public') {
-        $this->db = $db;
+    public function __construct($config, $schema = 'public') {
+        $this->config = $config;
+        $this->db = $config;
+//        $this->db = new \PDO($this->config['driver'], $this->config['username'], $this->config['password']);
         $this->schema = $schema;
     }
 

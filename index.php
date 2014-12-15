@@ -1,16 +1,18 @@
 <?php
 
+use Repel\Config;
+
 try {
     require_once 'autoloader.php';
-    require_once __DIR__ . '/Config/config.php';
-    require_once __DIR__ . '/_scripts/maciej2.php';
+
+    require_once __DIR__ . '/maciej2.php';
     echo "<html>";
     echo '<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />';
-    $user = DUser::finder()->findOne();
-    print_r($user);
+//    $user = DUser::finder()->findOne();
+//    print_r($user);
 //
-//    $admin_rec = DAdminRecord::finder()->findByPK(1);
-//    print_r($admin_rec);
+    $admin_rec = DAdmin::finder()->findByPK(1);
+    print_r($admin_rec);
 //
 //    $admin_rec2 = DAdminRecord::finder()->findByAdminId(1);
 //    print_r($admin_rec2);

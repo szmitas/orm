@@ -1,22 +1,30 @@
 <?php
+
 namespace Repel\Framework;
-class FActiveRecord extends FPDO {
+
+use Repel\Config;
+
+class RActiveRecord extends FPDO {
 
     private $PDO;
     private $_record = false;
 
-    public function __construct() {
-        global $repel_db_config;
+    public function __construct($db_config = null) {
+        if ($db_config !== null) {
+            $repel_db_config = $db_config;
+        } else {
+            $repel_db_config = require_once __DIR__ . '/../Config/database.php';
+        }
 
         $connection = FDbConnection::instance($repel_db_config['driver'], $repel_db_config['username'], $repel_db_config['password']);
         $this->PDO = $connection->PDOInstance;
     }
-    
+
     static public function finder() {
-		$className = get_called_class ();
-		$queryClass = $className . 'Query';
-		return new $queryClass ( $className );
-	}
+        $className = get_called_class();
+        $queryClass = $className . 'Query';
+        return new $queryClass($className);
+    }
 
     public function save() {
         $primary_key = FString::camelize_name($this->TABLE) . "_id";

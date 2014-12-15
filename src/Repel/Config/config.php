@@ -1,5 +1,7 @@
 <?php
+
 namespace Repel\Config;
+
 function class_autoload($pClassName) {
     $file = __DIR__ . "/../Framework/" . $pClassName . ".php";
     if (file_exists($file)) {

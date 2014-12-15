@@ -1,6 +1,8 @@
 <?php
+
 namespace Repel\Framework;
-class FActiveRecordCriteria extends FComponent {
+
+class RActiveRecordCriteria extends FComponent {
 
     public $condition;
     public $parameters;

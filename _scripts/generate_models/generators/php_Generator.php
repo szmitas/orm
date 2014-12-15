@@ -10,10 +10,8 @@ class php_Generator extends Generator {
         $table_name = Generator::singular($table->name);
         $this->table_name = $table_name;
 
-        $result = "class D{$table_name}Base extends FActiveRecord {\n\n";
+        $result = "class D{$table_name}Base extends RActiveRecord {\n\n";
         $result.= "\tpublic \$TABLE = \"{$table->name}\";\n\n";
-
-
 
         $result .= $this->generateObjectProperties($table->columns);
         $result.="\n";
@@ -229,7 +227,7 @@ class php_Generator extends Generator {
         $table_name = Generator::singular($table->name);
         $this->table_name = $table_name;
 
-        $query = "class D{$table_name}BaseQuery extends FActiveQuery {\n\n";
+        $query = "class D{$table_name}BaseQuery extends RActiveQuery {\n\n";
 
 
         $query .= $this->generateColumnTypesArray($table->columns);

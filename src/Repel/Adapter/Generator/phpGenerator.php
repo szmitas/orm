@@ -6,18 +6,16 @@ use Repel\Adapter\Generator\BaseGenerator;
 
 class phpGenerator extends BaseGenerator {
 
-    protected $table_name = "";
-    protected $foreign_keys = array();
-    protected $cross_reference = false;
+    private $table_name = "";
+    private $foreign_keys = array();
+    private $cross_reference = false;
 
     public function generate($table) {
         $table_name = BaseGenerator::singular($table->name);
         $this->table_name = $table_name;
 
-        $result = "class D{$table_name}Base extends FActiveRecord {\n\n";
+        $result = "class D{$table_name}Base extends RActiveRecord {\n\n";
         $result.= "\tpublic \$TABLE = \"{$table->name}\";\n\n";
-
-
 
         $result .= $this->generateObjectProperties($table->columns);
         $result.="\n";
@@ -184,23 +182,9 @@ class phpGenerator extends BaseGenerator {
         $active_record_name = BaseGenerator::singular($this->table_name);
 
         $result = "\tpublic function findBy{$function_name}(\${$column->name}) {\n";
-        $result .= "\t\treturn D{$active_record_name}::finder()->find(\"{$column->name} = :{$column->name}\", array(\":{$column->name}\" => \${$column->name}));\n";
+        $result .= "\t\treturn D{$active_record_name}::finder()->findBy(\"{$column->name}\", \${$column->name});\n";
         $result .= "\t}\n\n";
 
-        if (substr($column->name, strlen($column->name) - 3) === "_id") {
-            $result .= "\tpublic function findBy{$function_name}s(array \$ids) {\n";
-            $result .= "\t\t\$i = 0;\n";
-            $result .= "\t\t\$parameters = array();\n";
-            $result .= "\t\t\$in_values = \"\";\n";
-            $result .= "\t\tforeach (\$ids as \$id) {\n";
-            $result .= "\t\t\t\$in_values .= \":id{\$i}, \";\n";
-            $result .= "\t\t\t\$parameters[\":id{\$i}\"] = \$id;\n";
-            $result .= "\t\t\t\$i++;\n";
-            $result .= "\t\t}\n";
-            $result .= "\t\t\$in_values = substr(\$in_values, 0, strlen(\$in_values) - 2);\n";
-            $result .= "\t\treturn D{$active_record_name}::finder()->find(\"{$column->name} IN ({\$in_values})\", \$parameters);\n";
-            $result .= "\t}\n\n";
-        }
         return $result;
     }
 
@@ -209,20 +193,19 @@ class phpGenerator extends BaseGenerator {
         $active_record_name = BaseGenerator::singular($this->table_name);
 
         $result = "\tpublic function findOneBy{$function_name}(\${$column->name}) {\n";
-        $result .= "\t\treturn D{$active_record_name}::finder()->findOne(\"{$column->name} = :{$column->name}\", array(\":{$column->name}\" => \${$column->name}));\n";
+        $result .= "\t\treturn D{$active_record_name}::finder()->findOneBy(\"{$column->name}\", \${$column->name});\n";
         $result .= "\t}\n\n";
         return $result;
     }
 
     public function generateFilterByFunction($column) {
         $function_name = BaseGenerator::firstLettersToUpper($column->name);
+        $active_record_name = BaseGenerator::singular($this->table_name);
+
         $result = "\tpublic function filterBy{$function_name}(\${$column->name}) {\n";
+        $result .= "\t\treturn D{$active_record_name}::finder()->filterBy(\"{$column->name}\", \${$column->name});\n";
         $result .= "\t}\n\n";
 
-        if (substr($column->name, strlen($column->name) - 3) === "_id") {
-            $result .= "\tpublic function filterBy{$function_name}s(array \$ids) {\n";
-            $result .= "\t}\n\n";
-        }
         return $result;
     }
 
@@ -248,7 +231,7 @@ class phpGenerator extends BaseGenerator {
         $table_name = BaseGenerator::singular($table->name);
         $this->table_name = $table_name;
 
-        $query = "class D{$table_name}BaseQuery extends FActiveQuery {\n\n";
+        $query = "class D{$table_name}BaseQuery extends RActiveQuery {\n\n";
 
 
         $query .= $this->generateColumnTypesArray($table->columns);

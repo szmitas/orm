@@ -70,7 +70,8 @@ class RActiveQuery {
         $criteria->Condition = "{$column} = :{$column}";
         $criteria->Parameters[":{$column}"] = $value;
 
-        return $this->execute($criteria);
+        $executor = new RExecutor($this->_record);
+        return $executor->find($criteria, true);
     }
 
     public function findOneByColumn($column, $value) {
@@ -79,7 +80,8 @@ class RActiveQuery {
         $criteria->Parameters[":{$column}"] = $value;
         $criteria->Limit = 1;
 
-        return $this->execute($criteria);
+        $executor = new RExecutor($this->_record);
+        return $executor->find($criteria, false);
     }
 
     public function find($criteria = null, $parameters = array()) {

@@ -16,7 +16,7 @@ class RExecutor extends FPDO {
         $this->PDO = $connection->PDOInstance;
     }
 
-    public function find(RActiveRecordCriteria $criteria) {
+    public function find(RActiveRecordCriteria $criteria, $multiple) {
         $table_name = $this->_record->TABLE;
 
         $statement = "SELECT * FROM {$table_name}";
@@ -59,20 +59,10 @@ class RExecutor extends FPDO {
         if (!$st->execute()) {
             throw new Exception("Error during query execution: " . implode(":", $st->errorInfo()));
         } else {
-            if ($simple) {
-                return $st->fetchAll();
+            if ($multiple) {
+                return $this->resultToObjectsArray($st->fetchAll(PDO::FETCH_CLASS));
             } else {
-                if (substr($statement, 0, 6) === "SELECT") {
-                    if ($multiple) {
-                        return $this->resultToObjectsArray($st->fetchAll(PDO::FETCH_CLASS));
-                    } else {
-                        return $this->resultToObject($st->fetch());
-                    }
-                } else if (substr($statement, 0, 6) === "INSERT") {
-                    return $this->PDO->lastInsertId();
-                } else if (substr($statement, 0, 6) === "UPDATE") {
-                    return $st->rowCount();
-                }
+                return $this->resultToObject($st->fetch());
             }
         }
     }
@@ -98,7 +88,8 @@ class RExecutor extends FPDO {
         }
     }
 
-    protected function resultToObject($result) {
+    protected
+            function resultToObject($result) {
         if ($result) {
             $class_name = get_class($this->_record);
             $class_obj = new $class_name;

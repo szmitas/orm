@@ -7,7 +7,7 @@ class RExecutor extends FPDO {
     protected $PDO;
     private $_record;
 
-    public function __construct($record) {
+    public function __construct(RActiveRecord $record) {
         $this->_record = $record;
 
         $repel_db_config = require_once __DIR__ . "/../Config/database.php";

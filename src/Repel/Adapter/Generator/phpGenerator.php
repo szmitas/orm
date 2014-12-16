@@ -179,10 +179,9 @@ class phpGenerator extends BaseGenerator {
 
     public function generateFindByFunction($column) {
         $function_name = BaseGenerator::firstLettersToUpper($column->name);
-        $active_record_name = BaseGenerator::singular($this->table_name);
 
         $result = "\tpublic function findBy{$function_name}(\${$column->name}) {\n";
-        $result .= "\t\treturn D{$active_record_name}::finder()->findByColumn(\"{$column->name}\", \${$column->name});\n";
+        $result .= "\t\treturn self::findByColumn(\"{$column->name}\", \${$column->name});\n";
         $result .= "\t}\n\n";
 
         return $result;
@@ -190,20 +189,18 @@ class phpGenerator extends BaseGenerator {
 
     public function generateFindOneByFunction($column) {
         $function_name = BaseGenerator::firstLettersToUpper($column->name);
-        $active_record_name = BaseGenerator::singular($this->table_name);
 
         $result = "\tpublic function findOneBy{$function_name}(\${$column->name}) {\n";
-        $result .= "\t\treturn D{$active_record_name}::finder()->findOneBy(\"{$column->name}\", \${$column->name});\n";
+        $result .= "\t\treturn self::findOneBy(\"{$column->name}\", \${$column->name});\n";
         $result .= "\t}\n\n";
         return $result;
     }
 
     public function generateFilterByFunction($column) {
         $function_name = BaseGenerator::firstLettersToUpper($column->name);
-        $active_record_name = BaseGenerator::singular($this->table_name);
 
         $result = "\tpublic function filterBy{$function_name}(\${$column->name}) {\n";
-        $result .= "\t\treturn D{$active_record_name}::finder()->filterBy(\"{$column->name}\", \${$column->name});\n";
+        $result .= "\t\treturn self::filterByColumn(\"{$column->name}\", \${$column->name});\n";
         $result .= "\t}\n\n";
 
         return $result;

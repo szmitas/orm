@@ -9,6 +9,7 @@ class RActiveQuery {
     protected $PDO;
     protected $_record;
     protected $_recordClass;
+    protected $_table;
     private $_where;
 
     public function __construct($record) {
@@ -17,6 +18,7 @@ class RActiveQuery {
         }
         $this->_recordClass = $record;
         $this->_record = new $record();
+        $this->_table = $this->_record->TABLE;
         $this->_where = array();
     }
 
@@ -34,7 +36,8 @@ class RActiveQuery {
                 $criteria = new RActiveRecordCriteria($criteria, $parameters);
             }
         } else {
-            // todo
+            $criteria = new RActiveRecordCriteria($this->_where);
+            $this->_where = array();
         }
 
         $criteria->Limit = 1;
@@ -48,7 +51,8 @@ class RActiveQuery {
                 $criteria = new RActiveRecordCriteria($criteria, $parameters);
             }
         } else {
-            // todo
+            $criteria = new RActiveRecordCriteria($this->_where);
+            $this->_where = array();
         }
 
         return RExecutor::instance($this->_record)->find($criteria, true);
@@ -67,9 +71,9 @@ class RActiveQuery {
                 $i++;
             }
 
-            $criteria->Condition = "{$column} IN ( " . substr($in_values, 0, strlen($in_values) - 2) . " )";
+            $criteria->Condition = "{$this->_table}.{$column} IN ( " . substr($in_values, 0, strlen($in_values) - 2) . " )";
         } else {
-            $criteria->Condition = "{$column} = :{$column}";
+            $criteria->Condition = "{$this->_table}.{$column} = :{$column}";
             $criteria->Parameters[":{$column}"] = $value;
         }
         $criteria->Limit = 1;
@@ -90,17 +94,25 @@ class RActiveQuery {
                 $i++;
             }
 
-            $criteria->Condition = "{$column} IN ( " . substr($in_values, 0, strlen($in_values) - 2) . " )";
+            $criteria->Condition = "{$this->_table}.{$column} IN ( " . substr($in_values, 0, strlen($in_values) - 2) . " )";
         } else {
-            $criteria->Condition = "{$column} = :{$column}";
+            $criteria->Condition = "{$this->_table}.{$column} = :{$column}";
             $criteria->Parameters[":{$column}"] = $value;
         }
 
         return RExecutor::instance($this->_record)->find($criteria, true);
     }
 
-    public function filterByColumn($column, $value) {
-        //if(!key_exists($column, $this->_where))
+    public function filterByColumn($column, $value, $operator = "=") {
+        $count = count($this->_where);
+        $this->_where[] = array(
+            "condition" => "{$this->_table}.{$column} {$operator} :{$column}{$count}",
+            "parameters" => array(":{$column}{$count}", $value)
+        );
+
+        print_r($this->_where);
+
+        return $this;
     }
 
     public function count($criteria = null, $parameters = array()) {

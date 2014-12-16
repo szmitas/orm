@@ -2,6 +2,8 @@
 
 namespace Repel\Framework;
 
+use Repel\Adapter\Generator;
+
 class RActiveQuery {
 
     protected $PDO;
@@ -17,42 +19,11 @@ class RActiveQuery {
     }
 
     public function findByPK($key) {
-        $primary_key = FString::camelize_name($this->_record->TABLE) . "_id";
-
-        $criteria = new RActiveRecordCriteria();
-        $criteria->Condition = $primary_key . " = :" . $primary_key;
-        $criteria->Parameters[$primary_key] = $key;
-
-        return $this->findOne($criteria);
+        return $this->findOneByColumn(Generator\BaseGenerator::tableToPK($this->_record->TABLE), $key);
     }
 
     public function findByPKs($keys) {
-        if (count($keys)) {
-            $primary_key = FString::camelize_name($this->_record->TABLE) . "_id";
-
-            $criteria = new RActiveRecordCriteria();
-
-            $i = 0;
-            $in_values = "";
-
-            foreach ($keys as $key) {
-                $in_values .= ":" . $primary_key . $i . ", ";
-                $criteria->Parameters[":" . $primary_key . $i] = $key;
-                $i++;
-            }
-
-            $criteria->Condition = $primary_key . " IN ( " . substr($in_values, 0, strlen($in_values) - 2) . " )";
-
-            return $this->find($criteria);
-        } else {
-            return array();
-        }
-    }
-
-    public function findBySql($statement, $criteria = null) {
-//        if ($criteria !== null) {
-//            return $this->execute($statement, $criteria);
-//        }
+        return $this->findByColumn(Generator\BaseGenerator::tableToPK($this->_record->TABLE), $keys);
     }
 
     public function findOne($criteria = null, $parameters = array()) {
@@ -62,26 +33,7 @@ class RActiveQuery {
 
         $criteria->Limit = 1;
 
-        return $this->execute($criteria);
-    }
-
-    public function findByColumn($column, $value) {
-        $criteria = new RActiveRecordCriteria();
-        $criteria->Condition = "{$column} = :{$column}";
-        $criteria->Parameters[":{$column}"] = $value;
-
-        $executor = new RExecutor($this->_record);
-        return $executor->find($criteria, true);
-    }
-
-    public function findOneByColumn($column, $value) {
-        $criteria = new RActiveRecordCriteria();
-        $criteria->Condition = "{$column} = :{$column}";
-        $criteria->Parameters[":{$column}"] = $value;
-        $criteria->Limit = 1;
-
-        $executor = new RExecutor($this->_record);
-        return $executor->find($criteria, false);
+        return RExecutor::instance($this->_record)->find($criteria, true);
     }
 
     public function find($criteria = null, $parameters = array()) {
@@ -96,6 +48,51 @@ class RActiveQuery {
 //        return $this->execute($statement, $criteria, $parameters, true);
     }
 
+    public function findOneByColumn($column, $value) {
+        $criteria = new RActiveRecordCriteria();
+
+        if (is_array($value)) {
+            $i = 0;
+            $in_values = "";
+
+            foreach ($value as $v) {
+                $in_values .= ":{$column}{$i}, ";
+                $criteria->Parameters[":{$column}{$i}"] = $v;
+                $i++;
+            }
+
+            $criteria->Condition = "{$column} IN ( " . substr($in_values, 0, strlen($in_values) - 2) . " )";
+        } else {
+            $criteria->Condition = "{$column} = :{$column}";
+            $criteria->Parameters[":{$column}"] = $value;
+        }
+        $criteria->Limit = 1;
+
+        return RExecutor::instance($this->_record)->find($criteria, false);
+    }
+
+    public function findByColumn($column, $value) {
+        $criteria = new RActiveRecordCriteria();
+
+        if (is_array($value)) {
+            $i = 0;
+            $in_values = "";
+
+            foreach ($value as $v) {
+                $in_values .= ":{$column}{$i}, ";
+                $criteria->Parameters[":{$column}{$i}"] = $v;
+                $i++;
+            }
+
+            $criteria->Condition = "{$column} IN ( " . substr($in_values, 0, strlen($in_values) - 2) . " )";
+        } else {
+            $criteria->Condition = "{$column} = :{$column}";
+            $criteria->Parameters[":{$column}"] = $value;
+        }
+
+        return RExecutor::instance($this->_record)->find($criteria, true);
+    }
+
     public function count($criteria = null, $parameters = array()) {
 //        $statement = "SELECT COUNT(*) FROM " . $this->_record->TABLE;
 //
@@ -107,9 +104,11 @@ class RActiveQuery {
 //        return $result[0]["COUNT(*)"];
     }
 
-    public function execute(RActiveRecordCriteria $criteria) {
-        $executor = new RExecutor($this->_record);
-        return $executor->find($criteria);
+    // todo
+    public function findBySql($statement, $criteria = null) {
+//        if ($criteria !== null) {
+//            return $this->execute($statement, $criteria);
+//        }
     }
 
 }

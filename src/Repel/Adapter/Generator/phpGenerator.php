@@ -182,7 +182,7 @@ class phpGenerator extends BaseGenerator {
         $active_record_name = BaseGenerator::singular($this->table_name);
 
         $result = "\tpublic function findBy{$function_name}(\${$column->name}) {\n";
-        $result .= "\t\treturn D{$active_record_name}::finder()->findBy(\"{$column->name}\", \${$column->name});\n";
+        $result .= "\t\treturn D{$active_record_name}::finder()->findByColumn(\"{$column->name}\", \${$column->name});\n";
         $result .= "\t}\n\n";
 
         return $result;

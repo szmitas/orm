@@ -2,18 +2,28 @@
 
 namespace Repel\Framework;
 
-class RExecutor extends FPDO {
+class RExecutor {
 
+    private static $singleton;
+    static $_record;
     protected $PDO;
-    private $_record;
 
     public function __construct(RActiveRecord $record) {
         $this->_record = $record;
 
-        $repel_db_config = require_once __DIR__ . "/../Config/database.php";
+        $repel_db_config = require __DIR__ . "/../Config/database.php";
 
         $connection = FDbConnection::instance($repel_db_config['driver'], $repel_db_config['username'], $repel_db_config['password']);
         $this->PDO = $connection->PDOInstance;
+
+        return $this;
+    }
+
+    public static function instance(RActiveRecord $record) {
+        if (!(self::$singleton instanceof self) || self::$singleton->_record !== $record) {
+            self::$singleton = new self($record);
+        }
+        return self::$singleton;
     }
 
     public function find(RActiveRecordCriteria $criteria, $multiple) {
@@ -50,7 +60,6 @@ class RExecutor extends FPDO {
         }
 
         $st = $this->PDO->prepare($statement);
-        $primary_key = FString::camelize_name($this->_record->TABLE) . "_id";
 
         foreach ($params as $key => &$value) {
             $st->bindParam($key, $value, \PDO::PARAM_STR);
@@ -60,7 +69,7 @@ class RExecutor extends FPDO {
             throw new Exception("Error during query execution: " . implode(":", $st->errorInfo()));
         } else {
             if ($multiple) {
-                return $this->resultToObjectsArray($st->fetchAll(PDO::FETCH_CLASS));
+                return $this->resultToObjectsArray($st->fetchAll(\PDO::FETCH_CLASS));
             } else {
                 return $this->resultToObject($st->fetch());
             }

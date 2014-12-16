@@ -9,6 +9,7 @@ class RActiveQuery {
     protected $PDO;
     protected $_record;
     protected $_recordClass;
+    private $_where;
 
     public function __construct($record) {
         if (!isset($record)) {
@@ -16,6 +17,7 @@ class RActiveQuery {
         }
         $this->_recordClass = $record;
         $this->_record = new $record();
+        $this->_where = array();
     }
 
     public function findByPK($key) {
@@ -27,8 +29,12 @@ class RActiveQuery {
     }
 
     public function findOne($criteria = null, $parameters = array()) {
-        if (!$criteria instanceof RActiveRecordCriteria) {
-            $criteria = new RActiveRecordCriteria($criteria, $parameters);
+        if ($criteria === null && $parameters === null) {
+            if (!$criteria instanceof RActiveRecordCriteria) {
+                $criteria = new RActiveRecordCriteria($criteria, $parameters);
+            }
+        } else {
+            // todo
         }
 
         $criteria->Limit = 1;
@@ -37,15 +43,15 @@ class RActiveQuery {
     }
 
     public function find($criteria = null, $parameters = array()) {
-//        if (!isset($this->_record->TABLE)) {
-//            throw new Exception('Unknown table name.');
-//        }
-//        $statement = "SELECT * FROM " . $this->_record->TABLE;
-//
-//        if (!$criteria instanceof RActiveRecordCriteria) {
-//            $criteria = new RActiveRecordCriteria($criteria, $parameters);
-//        }
-//        return $this->execute($statement, $criteria, $parameters, true);
+        if ($criteria === null && $parameters === null) {
+            if (!$criteria instanceof RActiveRecordCriteria) {
+                $criteria = new RActiveRecordCriteria($criteria, $parameters);
+            }
+        } else {
+            // todo
+        }
+
+        return RExecutor::instance($this->_record)->find($criteria, true);
     }
 
     public function findOneByColumn($column, $value) {
@@ -93,6 +99,10 @@ class RActiveQuery {
         return RExecutor::instance($this->_record)->find($criteria, true);
     }
 
+    public function filterByColumn($column, $value) {
+        //if(!key_exists($column, $this->_where))
+    }
+
     public function count($criteria = null, $parameters = array()) {
 //        $statement = "SELECT COUNT(*) FROM " . $this->_record->TABLE;
 //
@@ -104,11 +114,8 @@ class RActiveQuery {
 //        return $result[0]["COUNT(*)"];
     }
 
-    // todo
     public function findBySql($statement, $criteria = null) {
-//        if ($criteria !== null) {
-//            return $this->execute($statement, $criteria);
-//        }
+        // todo
     }
 
 }

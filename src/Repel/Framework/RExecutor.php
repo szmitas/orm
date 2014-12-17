@@ -135,8 +135,8 @@ class RExecutor {
             foreach ($results as $result) {
                 $class_obj = new $class_name;
 
-                foreach ($result as $key => $value) {
-                    $class_obj->$key = $value;
+                foreach ($class_obj->TYPES as $key => $type) {
+                    $class_obj->$key = $result[$key];
                 }
 
                 $class_obj->_record = true;
@@ -155,9 +155,7 @@ class RExecutor {
             $class_name = get_class($this->_record);
             $class_obj = new $class_name;
 
-            $keys = array_keys($result);
-
-            foreach ($keys as $key) {
+            foreach ($class_obj->TYPES as $key => $type) {
                 $class_obj->$key = $result[$key];
             }
 

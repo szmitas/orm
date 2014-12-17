@@ -2,6 +2,8 @@
 
 namespace Repel\Framework;
 
+use Repel\Adapter\Generator;
+
 class RExecutor {
 
     private static $singleton;
@@ -13,7 +15,7 @@ class RExecutor {
 
         $repel_db_config = require __DIR__ . "/../Config/database.php";
 
-        $connection = FDbConnection::instance($repel_db_config['driver'], $repel_db_config['username'], $repel_db_config['password']);
+        $connection = FDbConnection::instance($repel_db_config["primary"]['driver'], $repel_db_config["primary"]['username'], $repel_db_config["primary"]['password']);
         $this->PDO = $connection->PDOInstance;
 
         return $this;
@@ -29,7 +31,13 @@ class RExecutor {
     public function find(RActiveRecordCriteria $criteria, $multiple) {
         $table_name = $this->_record->TABLE;
 
-        $statement = "SELECT * FROM {$table_name}";
+        $columns = "";
+        foreach ($this->_record->TYPES as $column => $type) {
+            $columns .= "{$table_name}.{$column}, ";
+        }
+        $columns = substr($columns, 0, strlen($columns) - 2);
+
+        $statement = "SELECT {$columns} FROM {$table_name}";
 
         if ($criteria->Condition !== null) {
             $statement .= " WHERE " . $criteria->Condition;
@@ -39,7 +47,7 @@ class RExecutor {
             $statement .= " ORDER BY";
             foreach ($criteria->OrdersBy as $key => $value) {
                 if (in_array(strtoupper($value), array("ASC", "DESC"))) {
-                    $statement .= " " . $key . " " . strtoupper($value) . ",";
+                    $statement .= " {$table_name}." . $key . " " . strtoupper($value) . ",";
                 } else {
                     throw new Exception("Wrong statement in ORDER BY clause: " . $value);
                 }
@@ -59,20 +67,64 @@ class RExecutor {
             $params = $criteria->Parameters;
         }
 
+        $result = $this->execute($statement, $params);
+
+        if ($multiple) {
+            return $this->resultToObjectsArray($result->fetchAll(\PDO::FETCH_CLASS));
+        } else {
+            return $this->resultToObject($result->fetch());
+        }
+    }
+
+    public function insert() {
+        $parameters = array();
+        $statement = "INSERT INTO " . $this->_record->TABLE . "( ";
+
+        $values = "( ";
+        foreach ($this->_record->TYPES as $property => $type) {
+            $statement .= "{$property}, ";
+            $values .= ":" . $property . ", ";
+            $parameters[":" . $property] = $this->_record->$property;
+        }
+        $statement = substr($statement, 0, strlen($statement) - 2);
+        $values = substr($values, 0, strlen($values) - 2);
+
+        $statement .= " ) VALUES " . $values . " )";
+
+        $this->execute($statement, $parameters);
+        return $this->PDO->lastInsertId();
+    }
+
+    public function update() {
+        $primary_key = Generator\BaseGenerator::tableToPK($this->_record->TABLE);
+
+        $parameters = array();
+        $statement = "UPDATE {$this->_record->TABLE} SET ";
+
+        foreach ($this->_record->TYPES as $property => $type) {
+            $statement .= "{$property} = :{$property}, ";
+            $parameters[":{$property}"] = $this->_record->$property;
+        }
+
+        $statement = substr($statement, 0, strlen($statement) - 2);
+        $statement .= " WHERE {$this->_record->TABLE}.{$primary_key} = :{$primary_key}";
+        $parameters[":{$primary_key}"] = $this->_record->$primary_key;
+
+        $result = $this->execute($statement, $parameters);
+        return $result->rowCount();
+    }
+
+    private function execute($statement, $parameters) {
         $st = $this->PDO->prepare($statement);
 
-        foreach ($params as $key => &$value) {
+        foreach ($parameters as $key => &$value) {
             $st->bindParam($key, $value, \PDO::PARAM_STR);
         }
 
-        if (!$st->execute()) {
-            throw new Exception("Error during query execution: " . implode(":", $st->errorInfo()));
+        if ($st->execute()) {
+            return $st;
         } else {
-            if ($multiple) {
-                return $this->resultToObjectsArray($st->fetchAll(\PDO::FETCH_CLASS));
-            } else {
-                return $this->resultToObject($st->fetch());
-            }
+            throw new \Exception("Error during query execution: " . implode(":", $st->errorInfo()));
         }
     }
 

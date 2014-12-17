@@ -62,9 +62,6 @@ class phpGenerator extends BaseGenerator {
 
         // @todo ogarnąć
         $result .= "\n\nclass D{$table_name} extends D{$table_name}Base {";
-        $result .= "\n\n\tpublic function save() {";
-        $result .= "\n\t\treturn parent::save();";
-        $result .= "\n\t}";
         $result .= "\n\n}\n\n";
 
         // @todo ogarnąć

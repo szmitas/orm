@@ -1,5 +1,5 @@
 <?php
-namespace Repel\Adapter\RelationClasses;
+namespace Repel\Adapter\Classes;
 
 class Relationship {
 

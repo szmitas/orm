@@ -1,5 +1,6 @@
 <?php
-namespace Repel\Adapter\RelationClasses;
+
+namespace Repel\Adapter\Classes;
 
 class Table {
 
@@ -35,14 +36,14 @@ class Table {
         foreach ($this->relationships as $krelationship => $relationship) {
             if ($column === null) {
                 if ($relationship->table === $table) {
-                    array_splice($this->relationships, $krelationship , 1);
+                    array_splice($this->relationships, $krelationship, 1);
                 }
             } else {
                 // Match $column also
             }
         }
     }
-    
+
     public function addRelationship(Relationship $relationship) {
         $this->relationships[] = $relationship;
     }

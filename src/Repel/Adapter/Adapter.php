@@ -5,10 +5,10 @@ namespace Repel\Adapter;
 use Repel\Adapter\Fetcher;
 use Repel\Includes\CLI;
 use Repel\Adapter\Generator;
-use Repel\Adapter\RelationClasses\Table;
-use Repel\Adapter\RelationClasses\Relationship;
-use Repel\Adapter\RelationClasses\ForeignKey;
-use Repel\Adapter\RelationClasses\Column;
+use Repel\Adapter\Classes\Table;
+use Repel\Adapter\Classes\Relationship;
+use Repel\Adapter\Classes\ForeignKey;
+use Repel\Adapter\Classes\Column;
 
 const DOT_FILL = 36;
 const HEADER_FILL = 38;
@@ -16,70 +16,70 @@ const HEADER_FILL = 38;
 class Adapter {
 
     protected $db;
-    protected $config;
+    public $config;
     protected $schema = 'public';
     protected $tables = array();
+    protected $fetchers = array();
 
     public function __construct($config) {
 
         echo CLI::h1('Repel adapter', HEADER_FILL);
-        switch ($config['type']) {
-            case 'pgsql':
-                $this->config = $config;
-                break;
-            default:
-                throw new Exception("Unknown database type. ({$config['type']})");
-        }
-        $this->connect();
+        $this->config = $config;
+//        switch ($config['type']) {
+//            case 'pgsql':
+//                $this->config = $config;
+//                break;
+//            default:
+//                throw new Exception("Unknown database type. ({$config['type']})");
+//        }
+//        $this->connect();
     }
 
     public function connect() {
-        echo CLI::dotFill('connecting', DOT_FILL);
-        $this->db = new \PDO($this->config ['driver'], $this->config ['username'], $this->config ['password']);
-        echo CLI::color("done", green) . "\n";
+//        echo CLI::dotFill('connecting', DOT_FILL);
+//        $this->db = new \PDO($this->config ['driver'], $this->config ['username'], $this->config ['password']);
+//        echo CLI::color("done", green) . "\n";
     }
 
-    public function addFetcher(){
-        echo 'addFetcher';
+    public function addFetcher($fetcher) {
+        $fetcher->setAdapter($this);
+
+
+        $this->fetchers[] = $fetcher;
         return $this;
     }
+
     /**
      * Fetch structure from database.
      * 
      * Can add custom fetcher by passing a fetcher instance as an argument.
      * @param Fetcher $custom_fetcher
      */
-    public function fetch($custom_fetcher = null) {
+    public function fetch() {
         echo CLI::dotFill('fetching structure', DOT_FILL);
 
-        if ($custom_fetcher instanceof Fetcher) {
-            $fetcher = $custom_fetcher;
-        } else {
-            // Automatic fetcher recognition
-            if ($this->config['type'] === 'pgsql') {
-                $fetcher = new Fetcher\PostgreSQLFetcher($this->db, $this->config['public_schema']);
-            }
+        foreach ($this->fetchers as $fetcher) {
+            $fetcher->fetch();
         }
-        $rows = $fetcher->fetch();
-
-        foreach ($rows as $row) {
-            if (!$this->tableExists($row)) {
-                $this->tableAdd($row);
-            }
-            $this->addColumn($row);
-        }
-
         $this->setRelationships();
-        $this->fixRelationships();
+        $this->addManyToMany();
+        
         echo CLI::color("done", green) . "\n";
         return $this;
     }
 
-    protected function fixRelationships() {
+    public function setManyToMany($tables_names) {
+        $this->many_to_many = $tables_names;
+    }
+
+    protected function addManyToMany() {
         // @TODO to be a constructor class
-        $relationship_config = require __DIR__ . '/../../../relationships.php';
+        $relationship_config = $this->many_to_many;
         foreach ($relationship_config as $table_name) {
             $table = $this->getTable($table_name);
+            if (!$table) {
+                throw new \Exception('(ManyToMany) Defined table does not exist: ' . $table_name);
+            }
             foreach ($table->columns as $column) {
                 if ($column->foreign_key) {
                     $referenced_table = $this->getTable($column->foreign_key->referenced_table);
@@ -121,28 +121,11 @@ class Adapter {
         }
     }
 
-    protected function addColumn($row) {
-        if (!isset($row) || !isset($row['table_name']) || !isset($row['column_name'])) {
-            throw new Exception('(addColumn) Wrong row format: ' . print_r($row, true));
-        }
-
-        $new_column = new Column();
-        $new_column->name = $row['column_name'];
-        $new_column->type = $row['data_type'];
-        $new_column->is_primary_key = $row['constraint_type'] === 'PRIMARY KEY' ? 1 : 0;
-        $new_column->is_null = $row['is_nullable'] === 'YES' ? 1 : 0;
-        if ($row['constraint_type'] === 'FOREIGN KEY') {
-            $new_column->foreign_key = new ForeignKey($row['referenced_table'], $row['referenced_column']);
-        }
-        $this->getTable($row['table_name'])->columns[] = $new_column;
+    public function addColumn($table_name, Column $column) {
+        $this->getTable($table_name)->columns[] = $column;
     }
 
-    protected function tableAdd($row) {
-        if (!isset($row) || !isset($row['table_name']) || !isset($row['table_type'])) {
-            throw new Exception('(tableAdd) Wrong row format: ' . print_r($row, true));
-        }
-        $table_name = $row['table_name'];
-        $table_type = $row['table_type'];
+    public function addTable($table_name, $table_type) {
         $new_table = new Table();
         $new_table->name = $table_name;
         if ($table_type === 'BASE TABLE') {
@@ -150,13 +133,13 @@ class Adapter {
         } elseif ($table_type === 'VIEW') {
             $new_table->type = 'view';
         } else {
-            throw new Exception('(tableAdd) Wrong table type: ' . print_r($row, true));
+            throw new Exception('(addTable) Wrong table type: ' . print_r($row, true));
         }
         $this->tables[] = $new_table;
         return $this->tables[count($this->tables) - 1];
     }
 
-    protected function getTable($table_name) {
+    public function getTable($table_name) {
         foreach ($this->tables as $ktable => $table) {
             if ($table->name === $table_name) {
                 return $this->tables[$ktable];
@@ -165,11 +148,7 @@ class Adapter {
         return false;
     }
 
-    protected function tableExists($row) {
-        if (!isset($row) || !isset($row['table_name'])) {
-            throw new Exception('(tableExists) Wrong row format: ' . print_r($row, true));
-        }
-        $table_name = $row['table_name'];
+    public function tableExists($table_name) {
         if ($this->getTable($table_name)) {
             return true;
         }

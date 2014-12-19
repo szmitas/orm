@@ -3,10 +3,10 @@ CREATE TABLE admins
 admin_id SERIAL,
 company_id INTEGER,
 login TEXT NOT NULL,
-first_name TEXT NOT NULL,
-last_name TEXT NOT NULL,
 email TEXT NOT NULL,
 password TEXT NOT NULL,
+first_name TEXT NOT NULL,
+last_name TEXT NOT NULL,
 deleted INTEGER NOT NULL DEFAULT 0,
 PRIMARY KEY (admin_id)
 );
@@ -61,7 +61,6 @@ CREATE TABLE user_datas
 user_data_id SERIAL,
 user_id INTEGER NOT NULL,
 date_created TIMESTAMPTZ NOT NULL DEFAULT now(),
-active INTEGER NOT NULL,
 first_name TEXT NOT NULL,
 last_name TEXT NOT NULL,
 address TEXT NOT NULL,

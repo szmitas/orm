@@ -2,9 +2,9 @@
 
 return array(
     "primary" => array(
-        'driver' => 'pgsql:dbname=szmitas_lbn;host=localhost',
+        'driver' => 'pgsql:dbname=repel;host=localhost',
         'type' => 'pgsql',
-        'database' => 'szmitas_lbn',
+        'database' => 'repel',
         'host' => 'localhost',
 //    'username' => 'postgres',
 //    'password' => 'trebiras',

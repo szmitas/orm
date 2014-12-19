@@ -6,13 +6,24 @@ try {
     require_once 'autoloader.php';
 
     require_once __DIR__ . '/maciej2.php';
-    echo "<html>";
-    echo '<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />';
 //    $user = DUser::finder()->findOne();
 //    print_r($user);
 //
-    $admin_rec = DAdmin::finder()->findByPK(1);
+//    $admin_rec = DAdmin::finder()->findByPK(1);
+//    print_r($admin_rec);
+//    $admin_rec = DAdmin::finder()->findByPKs(array(1, 2));
+//    print_r($admin_rec);
+//    $admin_rec = DAdmin::finder()->findOne("login = :login", array(":login" => "szmitas"));
+//    print_r($admin_rec);
+//    $admin_rec = DAdmin::finder()->findByLogin(array("szmitas", "radek"));
+//    print_r($admin_rec);
+        $admin_rec = DAdmin::finder()->findByLogin("adam");
     print_r($admin_rec);
+    $admin_rec->email = "zmiana2";
+    $admin_rec->save();
+        $admin_rec2 = DAdmin::finder()->findByLogin("adam");
+        print_r($admin_rec2);
+//    print_r($admin_rec);
 //
 //    $admin_rec2 = DAdminRecord::finder()->findByAdminId(1);
 //    print_r($admin_rec2);

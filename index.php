@@ -11,7 +11,7 @@ try {
 //    $user = DUser::finder()->findOne();
 //    print_r($user);
 //
-    $admin_rec = DAdmin::finder()->findByPK(1);
+    $admin_rec = DUser::finder()->findByPK(1);
     print_r($admin_rec);
 //
 //    $admin_rec2 = DAdminRecord::finder()->findByAdminId(1);

@@ -20,32 +20,25 @@ class Adapter {
     protected $schema = 'public';
     protected $tables = array();
     protected $fetchers = array();
+    protected $generators = array();
 
     public function __construct($config) {
-
         echo CLI::h1('Repel adapter', HEADER_FILL);
         $this->config = $config;
-//        switch ($config['type']) {
-//            case 'pgsql':
-//                $this->config = $config;
-//                break;
-//            default:
-//                throw new Exception("Unknown database type. ({$config['type']})");
-//        }
-//        $this->connect();
     }
 
-    public function connect() {
-//        echo CLI::dotFill('connecting', DOT_FILL);
-//        $this->db = new \PDO($this->config ['driver'], $this->config ['username'], $this->config ['password']);
-//        echo CLI::color("done", green) . "\n";
-    }
 
     public function addFetcher($fetcher) {
         $fetcher->setAdapter($this);
-
-
+        
         $this->fetchers[] = $fetcher;
+        return $this;
+    }
+    
+    public function addGenerator($generator){
+        $generator->setAdapter($this);
+        
+        $this->generators[] = $generator;
         return $this;
     }
 
@@ -155,23 +148,23 @@ class Adapter {
         return false;
     }
 
-    public function generate($table) {
-
-        $table_name = Generator\BaseGenerator::singular($table->name);
-        $table_name[0] = strtoupper($table_name[0]);
-
-        echo CLI::dotFill($table_name . ' (' . CLI::color($table->type, dark_gray) . ')', DOT_FILL + 11);
-
-        $generator = new Generator\phpGenerator();
-        $result = $generator->generate($table);
-
-        echo CLI::color("saved", green) . "\n";
-
-        return $result;
-    }
+//    public function generate($table) {
+//
+//        $table_name = Generator\BaseGenerator::singular($table->name);
+//        $table_name[0] = strtoupper($table_name[0]);
+//
+//        echo CLI::dotFill($table_name . ' (' . CLI::color($table->type, dark_gray) . ')', DOT_FILL + 11);
+//
+//        $generator = new Generator\phpGenerator();
+//        $result = $generator->generate($table);
+//
+//        echo CLI::color("saved", green) . "\n";
+//
+//        return $result;
+//    }
 
     public function save() {
-        echo CLI::h1('saving models', HEADER_FILL);
+        echo CLI::h1('Generate', HEADER_FILL);
         $file = $this->config['model_file_path'];
 
         $file_handle = fopen($file, 'w');

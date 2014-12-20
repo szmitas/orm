@@ -8,8 +8,18 @@ class phpGenerator extends BaseGenerator {
 
     private $table_name = "";
     private $foreign_keys = array();
+    protected $adapter = null;
     private $cross_reference = false;
 
+    
+    public function setAdapter($adapter) {
+        if (get_class($adapter) === 'Repel\Adapter\Adapter') {
+            $this->adapter = $adapter;
+        } else {
+            throw new \Exception('phpGenerator wrong adapter instance given.');
+        }
+    }
+    
     public function generate($table) {
         $table_name = BaseGenerator::singular($table->name);
         $this->table_name = $table_name;
@@ -62,9 +72,6 @@ class phpGenerator extends BaseGenerator {
 
         // @todo ogarnąć
         $result .= "\n\nclass D{$table_name} extends D{$table_name}Base {";
-        $result .= "\n\n\tpublic function save() {";
-        $result .= "\n\t\treturn parent::save();";
-        $result .= "\n\t}";
         $result .= "\n\n}\n\n";
 
         // @todo ogarnąć

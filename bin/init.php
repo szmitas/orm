@@ -13,6 +13,7 @@ try {
     $adapter = new Adapter($config);
     $adapter->addFetcher(new Fetcher\PostgreSQLFetcher('primary'))
             ->addFetcher(new Fetcher\PhpManyToManyFetcher(__DIR__.'/../relationships.php'))
+            ->addGenerator(new Generator\phpGenerator() )
             ->fetch()
             ->save();
 } catch (Exception $ex) {

@@ -24,5 +24,11 @@ class RActiveRecord {
             return RExecutor::instance($this)->insert();
         }
     }
+    
+    public function delete() {
+        if ($this->_record) {
+            return RExecutor::instance($this)->delete();
+        }
+    }
 
 }

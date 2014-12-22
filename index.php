@@ -1,11 +1,9 @@
 <?php
 
 use Repel\Config;
-
 try {
     require_once 'autoloader.php';
 
-    require_once __DIR__ . '/maciej2.php';
 //    $user = DUser::finder()->findOne();
 //    print_r($user);
 //
@@ -17,12 +15,17 @@ try {
 //    print_r($admin_rec);
 //    $admin_rec = DAdmin::finder()->findByLogin(array("szmitas", "radek"));
 //    print_r($admin_rec);
-        $admin_rec = DAdmin::finder()->findByLogin("adam");
-    print_r($admin_rec);
-    $admin_rec->email = "zmiana2";
-    $admin_rec->save();
-        $admin_rec2 = DAdmin::finder()->findByLogin("adam");
-        print_r($admin_rec2);
+    
+        $admin = data\DAdmin::finder()->findByLogin("bob");
+        $admin->login='maciej';
+        $admin->delete();
+        print_r($admin);
+        $admin->save();
+//    print_r($admin_rec);
+//    $admin_rec->email = "zmiana2";
+//    $admin_rec->save();
+//        $admin_rec2 = data\DAdmin::finder()->findByLogin("adam");
+//        print_r($admin_rec2);
 //    print_r($admin_rec);
 //
 //    $admin_rec2 = DAdminRecord::finder()->findByAdminId(1);

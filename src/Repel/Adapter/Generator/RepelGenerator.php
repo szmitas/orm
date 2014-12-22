@@ -3,28 +3,135 @@
 namespace Repel\Adapter\Generator;
 
 use Repel\Adapter\Generator\BaseGenerator;
+use Repel\Includes\CLI;
 
-class phpGenerator extends BaseGenerator {
+const DOT_FILL = 36;
+const HEADER_FILL = 38;
+
+class RepelGenerator extends BaseGenerator {
 
     private $table_name = "";
     private $foreign_keys = array();
     protected $adapter = null;
     private $cross_reference = false;
 
-    
+    public function __construct($model_path = null) {
+        if ($model_path) {
+            $this->model_path = $model_path;
+        } else {
+            $this->model_path = __DIR__ . '/Data/';
+        }
+        $this->base_path = $this->model_path . 'Base/';
+    }
+
     public function setAdapter($adapter) {
         if (get_class($adapter) === 'Repel\Adapter\Adapter') {
             $this->adapter = $adapter;
         } else {
-            throw new \Exception('phpGenerator wrong adapter instance given.');
+            throw new \Exception('[RepelGenerator] wrong adapter instance given.');
         }
     }
-    
-    public function generate($table) {
+
+    public static function getTableName($name) {
+        return 'D' . self::firstLettersToUpper(self::singular($name));
+    }
+
+    public static function getTableBaseName($name) {
+        return 'R' . self::firstLettersToUpper(self::singular($name)) . 'Base';
+    }
+
+    public static function getQueryName($name) {
+        return 'D' . self::firstLettersToUpper(self::singular($name)) . 'Query';
+    }
+
+    public static function getQueryBaseName($name) {
+        return 'R' . self::firstLettersToUpper(self::singular($name)) . 'QueryBase';
+    }
+
+    public function generate() {
+
+
+        if (!is_dir($this->model_path)) {
+            throw new \Exception("[RepelGenerator] Given model path does not exist, or is not a directory! ({$this->model_path})");
+        }
+        if (!is_dir($this->base_path)) {
+            mkdir($this->base_path);
+        } else {
+            // Check if proper directory 
+            $dh = opendir($this->base_path);
+            $ignore = array('.', '..');
+            $warning = false;
+            while (false !== ($filename = readdir($dh))) {
+                if (in_array($filename, $ignore)) {
+                    continue;
+                }
+                if (preg_match('/^R.*Base.php$/', $filename)) {
+                    unlink($this->base_path . $filename);
+                } else {
+                    $warning = true;
+                }
+            }
+        }
+
+//        file_put_contents($this->base_path . $filename . '.php', $this->generateBaseActiveRecord($table));
+
+        if ($warning) {
+            echo CLI::warning("Warning! Irrelevant files found in base_path!");
+        }
+        foreach ($this->adapter->getTables() as $table) {
+            echo CLI::dotFill($table->name . ' (' . CLI::color($table->type, dark_gray) . ')', DOT_FILL + 11);
+
+            $table_filename = self::getTableName($table->name);
+            $query_filename = self::getQueryName($table->name);
+            $table_base_filename = self::getTableBaseName($table->name);
+            $query_base_filename = self::getQueryBaseName($table->name);
+
+            file_put_contents($this->model_path . $table_filename . '.php', $this->generateTable($table));
+            file_put_contents($this->model_path . $query_filename . '.php', $this->generateTableQuery($table));
+            file_put_contents($this->base_path . $table_base_filename . '.php', $this->generateTableBase($table));
+            file_put_contents($this->base_path . $query_base_filename . '.php', $this->generateTableQueryBase($table));
+
+            echo CLI::color("done", green) . "\n";
+        }
+    }
+
+//    public function generateBaseActiveRecord() {
+//        $result = '';
+//        $result .= "<?php\n";
+//        $result .= "class _BaseActiveRecord {};\n\n";
+//        return $result;
+//    }
+
+    public function generateTable($table) {
+        $result .= "<?php" . "\n";
+        $result .= "namespace data;";
+        $result .= "\n";
+        $result .= "use data\Base;";
+
+        $result .= "\n\nclass " . self::getTableName($table->name) . " extends Base\\" . self::getTableBaseName($table->name) . " {";
+        $result .= "\n\n}\n\n";
+        return $result;
+    }
+
+    public function generateTableQuery($table) {
+        $result .= "<?php" . "\n";
+        $result .= "namespace data;";
+        $result .= "\n";
+        $result .= "use data\Base;";
+        $result .= "\n\nclass " . self::getQueryName($table->name) . " extends Base\\" . self::getQueryBaseName($table->name) . " {";
+        $result .= "\n\n}\n\n";
+        return $result;
+    }
+
+    public function generateTableBase($table) {
         $table_name = BaseGenerator::singular($table->name);
         $this->table_name = $table_name;
-
-        $result = "class D{$table_name}Base extends RActiveRecord {\n\n";
+        $result = '';
+        $result .= "<?php" . "\n\n";
+        $result .= "namespace data\Base;\n";
+        $result .= "\n";
+        $result .= "use Repel\Framework\RActiveRecord;\n\n";
+        $result .= "class " . self::getTableBaseName($table->name) . " extends RActiveRecord {\n\n";
         $result.= "\tpublic \$TABLE = \"{$table->name}\";\n\n";
 
         $result .= $this->generateObjectProperties($table->columns);
@@ -68,17 +175,46 @@ class phpGenerator extends BaseGenerator {
 
         $result.="}\n\n";
 
-        $result .= $this->generateQuery($table);
-
-        // @todo ogarnąć
-        $result .= "\n\nclass D{$table_name} extends D{$table_name}Base {";
-        $result .= "\n\n}\n\n";
-
-        // @todo ogarnąć
-        $result .= "\n\nclass D{$table_name}Query extends D{$table_name}BaseQuery {";
-        $result .= "\n\n}\n\n";
 
         return $result;
+    }
+
+    public function generateTableQueryBase($table) {
+        $query = '';
+        $query .= "<?php" . "\n\n";
+        $query .= "namespace data\Base;\n";
+        $query .= "\n";
+        $query .= "use Repel\Framework\RActiveQuery;\n\n";
+        $table_name = BaseGenerator::singular($table->name);
+        $this->table_name = $table_name;
+
+        $query .= "class " . self::getQueryBaseName($table->name) . " extends RActiveQuery {\n\n";
+
+        $query .= $this->generateColumnTypesArray($table->columns);
+        $query.="\n";
+
+
+        foreach ($table->columns as $column) {
+            $query .= $this->generateFindByFunction($column);
+        }
+
+        foreach ($table->columns as $column) {
+            $query .= $this->generateFindOneByFunction($column);
+        }
+
+        foreach ($table->columns as $column) {
+            $query .= $this->generateFilterByFunction($column);
+        }
+
+        $query .= "\t// others\n";
+        foreach ($table->columns as $column) {
+            if ($column->name === "deleted") {
+                $query .= $this->generateDeleteFunction($table->type);
+                break;
+            }
+        }
+        $query.= "}\n";
+        return $query;
     }
 
     public function generateObjectProperties($columns) {
@@ -228,41 +364,6 @@ class phpGenerator extends BaseGenerator {
         }
 
         return $result;
-    }
-
-    protected function generateQuery($table) {
-        $query = '';
-        $table_name = BaseGenerator::singular($table->name);
-        $this->table_name = $table_name;
-
-        $query = "class D{$table_name}BaseQuery extends RActiveQuery {\n\n";
-
-
-        $query .= $this->generateColumnTypesArray($table->columns);
-        $query.="\n";
-
-
-        foreach ($table->columns as $column) {
-            $query .= $this->generateFindByFunction($column);
-        }
-
-        foreach ($table->columns as $column) {
-            $query .= $this->generateFindOneByFunction($column);
-        }
-
-        foreach ($table->columns as $column) {
-            $query .= $this->generateFilterByFunction($column);
-        }
-
-        $query .= "\t// others\n";
-        foreach ($table->columns as $column) {
-            if ($column->name === "deleted") {
-                $query .= $this->generateDeleteFunction($table->type);
-                break;
-            }
-        }
-        $query.= "}\n";
-        return $query;
     }
 
 }

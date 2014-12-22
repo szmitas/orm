@@ -64,6 +64,13 @@ class CLI {
         $return.= "\n";
         return $return;
     }
+    
+    public static function warning($text) {
+        $return.= "\n";
+        $return.= CLI::color($text, 'white', 'yellow') . "\n";
+        $return.= "\n";
+        return $return;
+    }
 
 // Returns colored string
     public function color($string, $foreground_color = null, $background_color = null) {
@@ -116,6 +123,22 @@ class CLI {
         $decoration = '';
         for ($i = 0; $i < $diff / 2; $i++) {
             $decoration.="=";
+        }
+        $text = "\n" . $decoration . " " . $text . " " . $decoration . "\n";
+        return $text;
+    }
+    public function h2($text, $length) {
+        $text = strtoupper(trim($text));
+        $diff = $length - strlen($text);
+        if ($diff < 2) {
+            $diff = 2;
+        }
+        if ($diff % 2 !== 0) {
+            $diff++;
+        }
+        $decoration = '';
+        for ($i = 0; $i < $diff / 2; $i++) {
+            $decoration.="-";
         }
         $text = "\n" . $decoration . " " . $text . " " . $decoration . "\n";
         return $text;

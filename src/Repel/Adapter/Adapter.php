@@ -32,6 +32,8 @@ class Adapter {
         $fetcher->setAdapter($this);
         
         $this->fetchers[] = $fetcher;
+        echo 'Add fetcher: ';
+        echo CLI::color(get_class($fetcher), dark_gray) . "\n";
         return $this;
     }
     
@@ -39,7 +41,14 @@ class Adapter {
         $generator->setAdapter($this);
         
         $this->generators[] = $generator;
+        echo 'Add generator: ';
+//        echo CLI::color( 'Add generator: ', white);
+        echo CLI::color(get_class($generator), dark_gray) . "\n";
         return $this;
+    }
+    
+    public function getTables(){
+        return $this->tables;
     }
 
     /**
@@ -49,7 +58,8 @@ class Adapter {
      * @param Fetcher $custom_fetcher
      */
     public function fetch() {
-        echo CLI::dotFill('fetching structure', DOT_FILL);
+        echo CLI::h2('Fetch', HEADER_FILL);
+//        echo CLI::dotFill('fetching structure', DOT_FILL);
 
         foreach ($this->fetchers as $fetcher) {
             $fetcher->fetch();
@@ -57,7 +67,8 @@ class Adapter {
         $this->setRelationships();
         $this->addManyToMany();
         
-        echo CLI::color("done", green) . "\n";
+        echo CLI::h2('-----', HEADER_FILL);
+//        echo CLI::color("done", green) . "\n";
         return $this;
     }
 
@@ -163,18 +174,13 @@ class Adapter {
 //        return $result;
 //    }
 
-    public function save() {
-        echo CLI::h1('Generate', HEADER_FILL);
-        $file = $this->config['model_file_path'];
+    public function generate() {
+        echo CLI::h2('Generate', HEADER_FILL);
 
-        $file_handle = fopen($file, 'w');
-        fwrite($file_handle, "<?php\n");
-        fwrite($file_handle, "class _BaseActiveRecords {};\n\n");
-        foreach ($this->tables as $table) {
-            fwrite($file_handle, $this->generate($table));
+        foreach ($this->generators as $generator){
+            $generator->generate();
         }
-        fclose($file_handle);
-        echo CLI::success();
+        echo CLI::h2('-----', HEADER_FILL);
     }
 
 }

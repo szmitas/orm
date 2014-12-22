@@ -4,7 +4,7 @@ namespace Repel\Adapter\Generator;
 
 class BaseGenerator {
 
-    public function singular($word, $delete_underscores = true) {
+    public static function singular($word, $delete_underscores = true) {
         // first letter to upper
         $word [0] = strtoupper($word [0]);
 
@@ -48,10 +48,11 @@ class BaseGenerator {
         return $word;
     }
 
-    public function firstLettersToUpper($word) {
+    public static function firstLettersToUpper($word) {
         return str_replace("_", "", mb_convert_case($word, MB_CASE_TITLE, 'UTF-8'));
     }
 
+    
     public static function str_replace_limit($search, $replace, $string, $limit = 1) {
         if (is_bool($pos = (strpos($string, $search)))) {
             return $string;
@@ -69,7 +70,7 @@ class BaseGenerator {
         return $string;
     }
 
-    public function generate($table) {
+    public function generateTable($table) {
         return $table;
     }
 

@@ -1,11 +1,12 @@
 #!/usr/bin/env php
 <?php
 require '../autoloader.php';
+
 use Repel\Includes\CLI;
 use Repel\Framework\DatabaseManager;
 
 const DOT_FILL = 30;
-const HEADER_FILL = 32;
+        const HEADER_FILL = 32;
 
 $config = require_once __DIR__ . '/../src/Repel/Config/database.php';
 
@@ -13,7 +14,7 @@ try {
     echo CLI::h1('create default database', HEADER_FILL);
     // Connecting
     echo CLI::dotFill('connecting', DOT_FILL);
-    $manager = new DatabaseManager($config);
+    $manager = new DatabaseManager($config['primary']);
     echo CLI::color("done", green);
     echo "\n";
     $result = $manager->db->exec('BEGIN;');
@@ -45,7 +46,9 @@ try {
     echo CLI::color("SUCCESS", 'white', 'green');
     echo "\n";
 } catch (Exception $e) {
-    $result = $manager->db->exec('ROLLBACK;');
+    if (isset($manager->db)) {
+        $result = $manager->db->exec('ROLLBACK;');
+    }
     echo CLI::color("failed", red);
     echo "\n";
     echo "\n";

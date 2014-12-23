@@ -363,7 +363,7 @@ class RepelGenerator extends BaseGenerator {
             $result .= "\t}\n";
         } else {
             $result .= "\n";
-            $result .= "'\tpublic function delete() {\n";
+            $result .= "\tpublic function delete() {\n";
             $result .= "\t\tthrow new Exception('Cannot delete a view record.');\n";
             $result .= "\t}\n";
         }

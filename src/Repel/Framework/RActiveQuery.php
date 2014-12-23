@@ -42,11 +42,11 @@ class RActiveQuery {
 
         $criteria->Limit = 1;
 
-        return RExecutor::instance($this->_record)->find($criteria, true);
+        return RExecutor::instance($this->_record)->find($criteria, false);
     }
 
     public function find($criteria = null, $parameters = array()) {
-        if ($criteria === null && $parameters === null) {
+        if ($criteria !== null && $parameters !== null) {
             if (!$criteria instanceof RActiveRecordCriteria) {
                 $criteria = new RActiveRecordCriteria($criteria, $parameters);
             }

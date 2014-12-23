@@ -17,6 +17,9 @@ class RepelGenerator extends BaseGenerator {
 
     public function __construct($model_path = null) {
         if ($model_path) {
+            if ($model_path[strlen($model_path) - 1] !== '/') {
+                $model_path .= '/';
+            }
             $this->model_path = $model_path;
         } else {
             $this->model_path = __DIR__ . '/data/';
@@ -91,7 +94,7 @@ class RepelGenerator extends BaseGenerator {
             if (!file_exists($this->model_path . $query_filename . '.php')) {
                 file_put_contents($this->model_path . $query_filename . '.php', $this->generateTableQuery($table));
             }
-            
+
             file_put_contents($this->base_path . $table_base_filename . '.php', $this->generateTableBase($table));
             file_put_contents($this->base_path . $query_base_filename . '.php', $this->generateTableQueryBase($table));
 
@@ -107,7 +110,7 @@ class RepelGenerator extends BaseGenerator {
 //    }
 
     public function generateTable($table) {
-        $result .= "<?php" . "\n";
+        $result = "<?php" . "\n";
         $result .= "namespace data;";
         $result .= "\n";
         $result .= "use data\Base;";
@@ -118,7 +121,7 @@ class RepelGenerator extends BaseGenerator {
     }
 
     public function generateTableQuery($table) {
-        $result .= "<?php" . "\n";
+        $result = "<?php" . "\n";
         $result .= "namespace data;";
         $result .= "\n";
         $result .= "use data\Base;";
@@ -130,8 +133,7 @@ class RepelGenerator extends BaseGenerator {
     public function generateTableBase($table) {
         $table_name = BaseGenerator::singular($table->name);
         $this->table_name = $table_name;
-        $result = '';
-        $result .= "<?php" . "\n\n";
+        $result = "<?php" . "\n\n";
         $result .= "namespace data\Base;\n";
         $result .= "\n";
         $result .= "use Repel\Framework\RActiveRecord;\n\n";
@@ -184,8 +186,7 @@ class RepelGenerator extends BaseGenerator {
     }
 
     public function generateTableQueryBase($table) {
-        $query = '';
-        $query .= "<?php" . "\n\n";
+        $query = "<?php" . "\n\n";
         $query .= "namespace data\Base;\n";
         $query .= "\n";
         $query .= "use Repel\Framework\RActiveQuery;\n\n";

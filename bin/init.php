@@ -13,9 +13,9 @@ try {
     // Create Instance and connect
     $adapter = new Adapter($config);
     $adapter->addFetcher(new Fetcher\PostgreSQLFetcher('primary'))
-            ->addFetcher(new Fetcher\PhpManyToManyFetcher(__DIR__.'/../relationships.php'))
+            ->addFetcher(new Fetcher\PhpManyToManyFetcher(__DIR__ . '/../relationships.php'))
             ->fetch()
-            ->addGenerator(new Generator\RepelGenerator(__DIR__.'/../app/data/') )
+            ->addGenerator(new Generator\RepelGenerator($config["model_directory_path"]))
             ->generate();
     echo CLI::success();
 } catch (Exception $ex) {

@@ -61,7 +61,6 @@ class RActiveQuery {
     public function findByColumn($column, $value) {
         $criteria = new RActiveRecordCriteria();
 
-        $multiple = false;
         if (is_array($value)) {
             $i = 0;
             $in_values = "";
@@ -73,13 +72,34 @@ class RActiveQuery {
             }
 
             $criteria->Condition = "{$this->_table}.{$column} IN ( " . substr($in_values, 0, strlen($in_values) - 2) . " )";
-            $multiple = true;
         } else {
             $criteria->Condition = "{$this->_table}.{$column} = :{$column}";
             $criteria->Parameters[":{$column}"] = $value;
         }
 
-        return RExecutor::instance($this->_record)->find($criteria, $multiple);
+        return RExecutor::instance($this->_record)->find($criteria, true);
+    }
+
+    public function findOneByColumn($column, $value) {
+        $criteria = new RActiveRecordCriteria();
+
+        if (is_array($value)) {
+            $i = 0;
+            $in_values = "";
+
+            foreach ($value as $v) {
+                $in_values .= ":{$column}{$i}, ";
+                $criteria->Parameters[":{$column}{$i}"] = $v;
+                $i++;
+            }
+
+            $criteria->Condition = "{$this->_table}.{$column} IN ( " . substr($in_values, 0, strlen($in_values) - 2) . " )";
+        } else {
+            $criteria->Condition = "{$this->_table}.{$column} = :{$column}";
+            $criteria->Parameters[":{$column}"] = $value;
+        }
+
+        return RExecutor::instance($this->_record)->find($criteria, false);
     }
 
     public function filterByColumn($column, $value, $operator = "=") {

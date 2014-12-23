@@ -339,7 +339,7 @@ class RepelGenerator extends BaseGenerator {
         $function_name = BaseGenerator::firstLettersToUpper($column->name);
 
         $result = "\tpublic function findOneBy{$function_name}(\${$column->name}) {\n";
-        $result .= "\t\treturn self::findOneBy(\"{$column->name}\", \${$column->name});\n";
+        $result .= "\t\treturn self::findOneByColumn(\"{$column->name}\", \${$column->name});\n";
         $result .= "\t}\n\n";
         return $result;
     }

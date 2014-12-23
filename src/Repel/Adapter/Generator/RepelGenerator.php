@@ -19,7 +19,7 @@ class RepelGenerator extends BaseGenerator {
         if ($model_path) {
             $this->model_path = $model_path;
         } else {
-            $this->model_path = __DIR__ . '/Data/';
+            $this->model_path = __DIR__ . '/data/';
         }
         $this->base_path = $this->model_path . 'Base/';
     }
@@ -33,19 +33,19 @@ class RepelGenerator extends BaseGenerator {
     }
 
     public static function getTableName($name) {
-        return 'D' . self::firstLettersToUpper(self::singular($name));
+        return 'D' . self::singular($name);
     }
 
     public static function getTableBaseName($name) {
-        return 'R' . self::firstLettersToUpper(self::singular($name)) . 'Base';
+        return 'R' . self::singular($name) . 'Base';
     }
 
     public static function getQueryName($name) {
-        return 'D' . self::firstLettersToUpper(self::singular($name)) . 'Query';
+        return 'D' . self::singular($name) . 'Query';
     }
 
     public static function getQueryBaseName($name) {
-        return 'R' . self::firstLettersToUpper(self::singular($name)) . 'QueryBase';
+        return 'R' . self::singular($name) . 'QueryBase';
     }
 
     public function generate() {
@@ -80,14 +80,18 @@ class RepelGenerator extends BaseGenerator {
         }
         foreach ($this->adapter->getTables() as $table) {
             echo CLI::dotFill($table->name . ' (' . CLI::color($table->type, dark_gray) . ')', DOT_FILL + 11);
-
             $table_filename = self::getTableName($table->name);
             $query_filename = self::getQueryName($table->name);
             $table_base_filename = self::getTableBaseName($table->name);
             $query_base_filename = self::getQueryBaseName($table->name);
 
-            file_put_contents($this->model_path . $table_filename . '.php', $this->generateTable($table));
-            file_put_contents($this->model_path . $query_filename . '.php', $this->generateTableQuery($table));
+            if (!file_exists($this->model_path . $table_filename . '.php')) {
+                file_put_contents($this->model_path . $table_filename . '.php', $this->generateTable($table));
+            }
+            if (!file_exists($this->model_path . $query_filename . '.php')) {
+                file_put_contents($this->model_path . $query_filename . '.php', $this->generateTableQuery($table));
+            }
+            
             file_put_contents($this->base_path . $table_base_filename . '.php', $this->generateTableBase($table));
             file_put_contents($this->base_path . $query_base_filename . '.php', $this->generateTableQueryBase($table));
 

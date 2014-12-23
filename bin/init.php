@@ -15,7 +15,7 @@ try {
     $adapter->addFetcher(new Fetcher\PostgreSQLFetcher('primary'))
             ->addFetcher(new Fetcher\PhpManyToManyFetcher(__DIR__.'/../relationships.php'))
             ->fetch()
-            ->addGenerator(new Generator\RepelGenerator(__DIR__.'/../app/Data/') )
+            ->addGenerator(new Generator\RepelGenerator(__DIR__.'/../app/data/') )
             ->generate();
     echo CLI::success();
 } catch (Exception $ex) {

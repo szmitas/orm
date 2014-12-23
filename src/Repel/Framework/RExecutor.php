@@ -7,11 +7,11 @@ use Repel\Adapter\Generator;
 class RExecutor {
 
     private static $singleton;
-    static $_record;
+    private $_record;
     protected $PDO;
 
     public function __construct(RActiveRecord $record) {
-        $this->_record = $record;
+        $this->record = $record;
 
         $repel_db_config = require __DIR__ . "/../Config/database.php";
 
@@ -29,17 +29,17 @@ class RExecutor {
     }
 
     public function find(RActiveRecordCriteria $criteria, $multiple) {
-        $table_name = $this->_record->TABLE;
+        $table_name = $this->record->TABLE;
 
         $columns = "";
-        foreach ($this->_record->TYPES as $column => $type) {
+        foreach ($this->record->TYPES as $column => $type) {
             $columns .= "{$table_name}.{$column}, ";
         }
         $columns = substr($columns, 0, strlen($columns) - 2);
 
         $statement = "SELECT {$columns} FROM {$table_name}";
 
-        if ($criteria->Condition !== null) {
+        if (strlen($criteria->Condition) > 0) {
             $statement .= " WHERE " . $criteria->Condition;
         }
 
@@ -65,6 +65,8 @@ class RExecutor {
         }
         if (count($criteria->Parameters) > 0) {
             $params = $criteria->Parameters;
+        } else {
+            $params = array();
         }
 
         $result = $this->execute($statement, $params);
@@ -78,13 +80,13 @@ class RExecutor {
 
     public function insert() {
         $parameters = array();
-        $statement = "INSERT INTO " . $this->_record->TABLE . "( ";
+        $statement = "INSERT INTO " . $this->record->TABLE . "( ";
 
         $values = "( ";
-        foreach ($this->_record->TYPES as $property => $type) {
+        foreach ($this->record->TYPES as $property => $type) {
             $statement .= "{$property}, ";
             $values .= ":" . $property . ", ";
-            $parameters[":" . $property] = $this->_record->$property;
+            $parameters[":" . $property] = $this->record->$property;
         }
         $statement = substr($statement, 0, strlen($statement) - 2);
         $values = substr($values, 0, strlen($values) - 2);
@@ -96,32 +98,32 @@ class RExecutor {
     }
 
     public function delete() {
-        $primary_key = Generator\BaseGenerator::tableToPK($this->_record->TABLE);
+        $primary_key = Generator\BaseGenerator::tableToPK($this->record->TABLE);
 
         //delete from admins where admin_id=1
         $parameters = array();
-        $statement = "DELETE FROM {$this->_record->TABLE} ";
-        $statement .= " WHERE {$this->_record->TABLE}.{$primary_key} = :{$primary_key}";
-        $parameters[":{$primary_key}"] = $this->_record->$primary_key;
+        $statement = "DELETE FROM {$this->record->TABLE} ";
+        $statement .= " WHERE {$this->record->TABLE}.{$primary_key} = :{$primary_key}";
+        $parameters[":{$primary_key}"] = $this->record->$primary_key;
 
         $result = $this->execute($statement, $parameters);
         return $result->rowCount();
     }
-    
+
     public function update() {
-        $primary_key = Generator\BaseGenerator::tableToPK($this->_record->TABLE);
+        $primary_key = Generator\BaseGenerator::tableToPK($this->record->TABLE);
 
         $parameters = array();
-        $statement = "UPDATE {$this->_record->TABLE} SET ";
+        $statement = "UPDATE {$this->record->TABLE} SET ";
 
-        foreach ($this->_record->TYPES as $property => $type) {
+        foreach ($this->record->TYPES as $property => $type) {
             $statement .= "{$property} = :{$property}, ";
-            $parameters[":{$property}"] = $this->_record->$property;
+            $parameters[":{$property}"] = $this->record->$property;
         }
 
         $statement = substr($statement, 0, strlen($statement) - 2);
-        $statement .= " WHERE {$this->_record->TABLE}.{$primary_key} = :{$primary_key}";
-        $parameters[":{$primary_key}"] = $this->_record->$primary_key;
+        $statement .= " WHERE {$this->record->TABLE}.{$primary_key} = :{$primary_key}";
+        $parameters[":{$primary_key}"] = $this->record->$primary_key;
 
         $result = $this->execute($statement, $parameters);
         return $result->rowCount();
@@ -143,13 +145,13 @@ class RExecutor {
 
     protected function resultToObjectsArray($results) {
         if (count($results) > 0) {
-            $class_name = get_class($this->_record);
+            $class_name = get_class($this->record);
             $results_records = array();
             foreach ($results as $result) {
                 $class_obj = new $class_name;
 
                 foreach ($class_obj->TYPES as $key => $type) {
-                    $class_obj->$key = $result[$key];
+                    $class_obj->$key = $result->$key;
                 }
 
                 $class_obj->_record = true;
@@ -162,10 +164,9 @@ class RExecutor {
         }
     }
 
-    protected
-            function resultToObject($result) {
+    protected function resultToObject($result) {
         if ($result) {
-            $class_name = get_class($this->_record);
+            $class_name = get_class($this->record);
             $class_obj = new $class_name;
 
             foreach ($class_obj->TYPES as $key => $type) {

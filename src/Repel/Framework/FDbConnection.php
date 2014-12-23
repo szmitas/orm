@@ -1,13 +1,15 @@
 <?php
+
 namespace Repel\Framework;
+
 class FDbConnection {
 
     private static $singleton;
-    private static $driver;
+    private $_driver;
     public $PDOInstance;
 
     private function __construct($driver, $user, $password) {
-        $this->driver = $driver;
+        $this->_driver = $driver;
         $this->PDOInstance = new FPDO($driver, $user, $password);
 //        $this->PDOInstance->query("SET NAMES " . $db_charset . " COLLATE " . $db_collate);
         $this->PDOInstance->query("SET time_zone = 'Europe/Warsaw'");
@@ -15,7 +17,7 @@ class FDbConnection {
     }
 
     public static function instance($driver, $user, $password) {
-        if (!(self::$singleton instanceof self) || self::$singleton->driver !== $driver) {
+        if (!(self::$singleton instanceof self) || self::$singleton->_driver !== $driver) {
             self::$singleton = new self($driver, $user, $password);
         }
         return self::$singleton;

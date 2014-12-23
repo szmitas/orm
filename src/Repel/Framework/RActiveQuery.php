@@ -88,9 +88,6 @@ class RActiveQuery {
             "condition" => "{$this->_table}.{$column} {$operator} :{$column}{$count}",
             "parameters" => array(":{$column}{$count}", $value)
         );
-
-        print_r($this->_where);
-
         return $this;
     }
 

@@ -194,8 +194,18 @@ class RepelGenerator extends BaseGenerator {
             }
         }
 
-        $result.="}\n\n";
+        $result .= "\t// others\n";
+        foreach ($table->columns as $column) {
+            if ($column->name === "deleted") {
+                $result .= $this->generateDeleteFunction($table->type);
+                break;
+            }
+        }
+        if ($table->type === 'table') {
+            $result .= $this->generateSaveFunction();
+        }
 
+        $result.="}\n\n";
 
         return $result;
     }
@@ -220,14 +230,6 @@ class RepelGenerator extends BaseGenerator {
 
         foreach ($table->columns as $column) {
             $query .= $this->generateFilterByFunction($column);
-        }
-
-        $query .= "\t// others\n";
-        foreach ($table->columns as $column) {
-            if ($column->name === "deleted") {
-                $query .= $this->generateDeleteFunction($table->type);
-                break;
-            }
         }
         $query.= "}\n";
         return $query;
@@ -395,18 +397,24 @@ class RepelGenerator extends BaseGenerator {
     }
 
     public function generateDeleteFunction($type) {
-        $result = "";
-        if ($type === 'table') {
-            $result .= "\tpublic function delete() {\n";
-            $result .= "\t\t\$this->deleted = time();\n";
-            $result .= "\t\t\$this->save();\n";
-            $result .= "\t}\n";
-        } else {
-            $result .= "\n";
-            $result .= "\tpublic function delete() {\n";
-            $result .= "\t\tthrow new Exception('Cannot delete a view record.');\n";
-            $result .= "\t}\n";
-        }
+        $result = "\tpublic function delete() {\n";
+        $result .= "\t\t\$this->deleted = time();\n";
+        $result .= "\t\treturn \$this->save();\n";
+        $result .= "\t}\n";
+
+        return $result;
+    }
+
+    public function generateSaveFunction() {
+        $primary_key = BaseGenerator::tableToPK($this->table_name);
+
+        $result = "\tpublic function save() {\n";
+        $result .= "\t\t\$id = parent::save();\n";
+        $result .= "\t\tif(\$id !== null) {\n";
+        $result .= "\t\t\t\$this->{$primary_key} = \$id;\n";
+        $result .= "\t\t}\n";
+        $result .= "\t\treturn \$id;\n";
+        $result .= "\t}\n";
 
         return $result;
     }

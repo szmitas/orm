@@ -79,6 +79,7 @@ class RExecutor {
     }
 
     public function insert() {
+        $primary_key = Generator\BaseGenerator::tableToPK($this->_record->TABLE);
         $parameters = array();
         $statement = "INSERT INTO " . $this->_record->TABLE . "( ";
 
@@ -93,10 +94,11 @@ class RExecutor {
         $statement = substr($statement, 0, strlen($statement) - 2);
         $values = substr($values, 0, strlen($values) - 2);
 
-        $statement .= " ) VALUES " . $values . " )";
+        $statement .= " ) VALUES " . $values . " ) RETURNING {$primary_key} as id";
 
-        $this->execute($statement, $parameters);
-        return $this->PDO->lastInsertId();
+        $st = $this->execute($statement, $parameters);
+
+        return $st->fetch()["id"];
     }
 
     public function delete() {

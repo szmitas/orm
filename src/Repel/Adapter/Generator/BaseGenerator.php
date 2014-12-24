@@ -52,7 +52,6 @@ class BaseGenerator {
         return str_replace("_", "", mb_convert_case($word, MB_CASE_TITLE, 'UTF-8'));
     }
 
-    
     public static function str_replace_limit($search, $replace, $string, $limit = 1) {
         if (is_bool($pos = (strpos($string, $search)))) {
             return $string;
@@ -95,7 +94,7 @@ class BaseGenerator {
             $name = FString::replace_limit("s_", "_", $name);
         }
 
-        return $name . "_id";
+        return mb_convert_case($name . "_id", MB_CASE_LOWER, 'UTF-8');
     }
 
 }

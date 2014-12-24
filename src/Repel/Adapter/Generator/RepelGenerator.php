@@ -83,6 +83,9 @@ class RepelGenerator extends BaseGenerator {
         }
         foreach ($this->adapter->getTables() as $table) {
             echo CLI::dotFill($table->name . ' (' . CLI::color($table->type, dark_gray) . ')', DOT_FILL + 11);
+
+            $this->clear();
+
             $table_filename = self::getTableName($table->name);
             $query_filename = self::getQueryName($table->name);
             $table_base_filename = self::getTableBaseName($table->name);
@@ -100,6 +103,12 @@ class RepelGenerator extends BaseGenerator {
 
             echo CLI::color("done", green) . "\n";
         }
+    }
+
+    public function clear() {
+        $this->foreign_keys = array();
+        $this->$table_name = "";
+        $this->cross_reference = false;
     }
 
 //    public function generateBaseActiveRecord() {

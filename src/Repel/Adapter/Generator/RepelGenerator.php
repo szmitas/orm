@@ -155,6 +155,9 @@ class RepelGenerator extends BaseGenerator {
         $result .= $this->generateAutoIncrementArray($table->columns);
         $result.="\n\n";
 
+        $result .= $this->generateDefaultArray($table->columns);
+        $result.="\n\n";
+
         $result .= $this->generateObjectProperties($table->columns);
         $result.="\n";
 
@@ -254,6 +257,17 @@ class RepelGenerator extends BaseGenerator {
         $result = "\tpublic \$AUTO_INCREMENT = array(\n";
         foreach ($columns as $column) {
             if (substr($column->default, 0, 7) === "nextval") {
+                $result .= "\t\t\"{$column->name}\",\n";
+            }
+        }
+        $result .= "\t);";
+        return $result;
+    }
+
+    public function generateDefaultArray($columns) {
+        $result = "\tpublic \$DEFAULT = array(\n";
+        foreach ($columns as $column) {
+            if ($column->default !== null) {
                 $result .= "\t\t\"{$column->name}\",\n";
             }
         }

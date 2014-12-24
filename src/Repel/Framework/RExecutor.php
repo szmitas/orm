@@ -11,7 +11,7 @@ class RExecutor {
     protected $PDO;
 
     public function __construct(RActiveRecord $record) {
-        $this->record = $record;
+        $this->_record = $record;
 
         $repel_db_config = require __DIR__ . "/../Config/database.php";
 
@@ -29,10 +29,10 @@ class RExecutor {
     }
 
     public function find(RActiveRecordCriteria $criteria, $multiple) {
-        $table_name = $this->record->TABLE;
+        $table_name = $this->_record->TABLE;
 
         $columns = "";
-        foreach ($this->record->TYPES as $column => $type) {
+        foreach ($this->_record->TYPES as $column => $type) {
             $columns .= "{$table_name}.{$column}, ";
         }
         $columns = substr($columns, 0, strlen($columns) - 2);
@@ -80,14 +80,14 @@ class RExecutor {
 
     public function insert() {
         $parameters = array();
-        $statement = "INSERT INTO " . $this->record->TABLE . "( ";
+        $statement = "INSERT INTO " . $this->_record->TABLE . "( ";
 
         $values = "( ";
-        foreach ($this->record->TYPES as $property => $type) {
-            if (!key_exists($property, $this->record->AUTO_INCREMENT)) {
+        foreach ($this->_record->TYPES as $property => $type) {
+            if (!in_array($property, $this->_record->AUTO_INCREMENT) && (!in_array($property, $this->_record->DEFAULT) || (in_array($property, $this->_record->DEFAULT) && $this->_record->$property !== null))) {
                 $statement .= "{$property}, ";
                 $values .= ":" . $property . ", ";
-                $parameters[":" . $property] = $this->record->$property;
+                $parameters[":" . $property] = $this->_record->$property;
             }
         }
         $statement = substr($statement, 0, strlen($statement) - 2);
@@ -95,44 +95,45 @@ class RExecutor {
 
         $statement .= " ) VALUES " . $values . " )";
 
+        echo $statement;
         $this->execute($statement, $parameters);
         return $this->PDO->lastInsertId();
     }
 
     public function delete() {
-        $primary_key = Generator\BaseGenerator::tableToPK($this->record->TABLE);
+        $primary_key = Generator\BaseGenerator::tableToPK($this->_record->TABLE);
 
         //delete from admins where admin_id=1
         $parameters = array();
-        $statement = "DELETE FROM {$this->record->TABLE} ";
-        $statement .= " WHERE {$this->record->TABLE}.{$primary_key} = :{$primary_key}";
-        $parameters[":{$primary_key}"] = $this->record->$primary_key;
+        $statement = "DELETE FROM {$this->_record->TABLE} ";
+        $statement .= " WHERE {$this->_record->TABLE}.{$primary_key} = :{$primary_key}";
+        $parameters[":{$primary_key}"] = $this->_record->$primary_key;
 
         $result = $this->execute($statement, $parameters);
         return $result->rowCount();
     }
 
     public function update() {
-        $primary_key = Generator\BaseGenerator::tableToPK($this->record->TABLE);
+        $primary_key = Generator\BaseGenerator::tableToPK($this->_record->TABLE);
 
         $parameters = array();
-        $statement = "UPDATE {$this->record->TABLE} SET ";
+        $statement = "UPDATE {$this->_record->TABLE} SET ";
 
-        foreach ($this->record->TYPES as $property => $type) {
+        foreach ($this->_record->TYPES as $property => $type) {
             $statement .= "{$property} = :{$property}, ";
-            $parameters[":{$property}"] = $this->record->$property;
+            $parameters[":{$property}"] = $this->_record->$property;
         }
 
         $statement = substr($statement, 0, strlen($statement) - 2);
-        $statement .= " WHERE {$this->record->TABLE}.{$primary_key} = :{$primary_key}";
-        $parameters[":{$primary_key}"] = $this->record->$primary_key;
+        $statement .= " WHERE {$this->_record->TABLE}.{$primary_key} = :{$primary_key}";
+        $parameters[":{$primary_key}"] = $this->_record->$primary_key;
 
         $result = $this->execute($statement, $parameters);
         return $result->rowCount();
     }
 
     public function count(RActiveRecordCriteria $criteria) {
-        $table_name = $this->record->TABLE;
+        $table_name = $this->_record->TABLE;
 
         $statement = "SELECT COUNT(*) as count FROM {$table_name}";
 
@@ -152,7 +153,7 @@ class RExecutor {
             $statement = substr($statement, 0, strlen($statement) - 1); // remove last ,
         }
 
-        if ((int) $criteria->Limit > 0 && (int) $criteria->Offset === 0) {
+        if ($criteria->Limit !== null && $criteria->Offset === null) {
             $statement .= " LIMIT :results_limit";
             $criteria->Parameters[":results_limit"] = (int) $criteria->Limit;
         } else if ($criteria->Limit !== null && $criteria->Offset !== null) {
@@ -186,7 +187,7 @@ class RExecutor {
 
     protected function resultToObjectsArray($results) {
         if (count($results) > 0) {
-            $class_name = get_class($this->record);
+            $class_name = get_class($this->_record);
             $results_records = array();
             foreach ($results as $result) {
                 $class_obj = new $class_name;
@@ -207,7 +208,7 @@ class RExecutor {
 
     protected function resultToObject($result) {
         if ($result) {
-            $class_name = get_class($this->record);
+            $class_name = get_class($this->_record);
             $class_obj = new $class_name;
 
             foreach ($class_obj->TYPES as $key => $type) {

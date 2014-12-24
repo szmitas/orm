@@ -95,7 +95,6 @@ class RExecutor {
 
         $statement .= " ) VALUES " . $values . " )";
 
-        echo $statement;
         $this->execute($statement, $parameters);
         return $this->PDO->lastInsertId();
     }

@@ -300,14 +300,20 @@ class RepelGenerator extends BaseGenerator {
     public function generateForeignKeyMethods() {
         $result = "\t// foreign key methods\n";
         foreach ($this->foreign_keys as $name => $fk) {
-            $object_name = BaseGenerator::singular($fk->referenced_table);
-            $class_name = mb_convert_case(BaseGenerator::singular($fk->referenced_table, false), MB_CASE_LOWER, 'UTF-8');
+            $class_name = BaseGenerator::singular($fk->referenced_table);
+            if (substr($name, strlen($name) - 3) === "_id") {
+                $key = substr($name, 0, strlen($name) - 3);
+            } else {
+                $key = $name;
+            }
+            $function_name = BaseGenerator::singular($key, true);
+            $object_name = mb_convert_case(BaseGenerator::singular($key, false), MB_CASE_LOWER, 'UTF-8');
 
-            $result .= "\tpublic function get{$object_name}() {\n";
-            $result .= "\tif(\$this->_{$class_name} === null) {\n";
-            $result .= "\t\t\$this->_{$class_name} = D{$object_name}::finder()->findByPK(\$this->{$name});\n";
+            $result .= "\tpublic function get{$function_name}() {\n";
+            $result .= "\tif(\$this->_{$object_name} === null) {\n";
+            $result .= "\t\t\$this->_{$object_name} = D{$class_name}::finder()->findByPK(\$this->{$name});\n";
             $result .= "\t}\n";
-            $result .= "\treturn \$this->_{$class_name};\n";
+            $result .= "\treturn \$this->_{$object_name};\n";
             $result .= "\t}\n";
         }
         return $result;

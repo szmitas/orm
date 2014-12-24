@@ -107,7 +107,7 @@ class RepelGenerator extends BaseGenerator {
 
     public function clear() {
         $this->foreign_keys = array();
-        $this->$table_name = "";
+        $this->table_name = "";
         $this->cross_reference = false;
     }
 

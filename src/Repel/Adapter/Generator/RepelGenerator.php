@@ -149,16 +149,19 @@ class RepelGenerator extends BaseGenerator {
         $result .= "class " . self::getTableBaseName($table->name) . " extends RActiveRecord {\n\n";
         $result.= "\tpublic \$TABLE = \"{$table->name}\";\n\n";
 
-        $result .= $this->generateObjectProperties($table->columns);
-        $result.="\n";
-
         $result .= $this->generateColumnTypesArray($table->columns);
+        $result.="\n\n";
+
+        $result .= $this->generateAutoIncrementArray($table->columns);
+        $result.="\n\n";
+
+        $result .= $this->generateObjectProperties($table->columns);
         $result.="\n";
 
         if (count($this->foreign_keys)) {
             $result .= $this->generateForeignKeyObjects();
+            $result.="\n";
         }
-        $result.="\n";
 
         if (count($table->relationships)) {
             $result .= $this->generateRelationshipObjects($table->relationships);
@@ -167,8 +170,8 @@ class RepelGenerator extends BaseGenerator {
                 $result .= "\t// relationship object\n";
                 $result .= "\tprivate \$_relationship = null;\n";
             }
+            $result.="\n";
         }
-        $result.="\n";
 
         if (count($this->foreign_keys)) {
             $result .= $this->generateForeignKeyMethods();
@@ -203,10 +206,6 @@ class RepelGenerator extends BaseGenerator {
         $this->table_name = $table_name;
 
         $query .= "class " . self::getQueryBaseName($table->name) . " extends RActiveQuery {\n\n";
-
-        $query .= $this->generateColumnTypesArray($table->columns);
-        $query.="\n";
-
 
         foreach ($table->columns as $column) {
             $query .= $this->generateFindByFunction($column);
@@ -246,6 +245,17 @@ class RepelGenerator extends BaseGenerator {
         $result = "\tpublic \$TYPES = array(\n";
         foreach ($columns as $column) {
             $result .= "\t\t\"{$column->name}\" => \"{$column->type}\",\n";
+        }
+        $result .= "\t);";
+        return $result;
+    }
+
+    public function generateAutoIncrementArray($columns) {
+        $result = "\tpublic \$AUTO_INCREMENT = array(\n";
+        foreach ($columns as $column) {
+            if (substr($column->default, 0, 7) === "nextval") {
+                $result .= "\t\t\"{$column->name}\",\n";
+            }
         }
         $result .= "\t);";
         return $result;

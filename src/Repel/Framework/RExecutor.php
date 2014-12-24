@@ -84,9 +84,11 @@ class RExecutor {
 
         $values = "( ";
         foreach ($this->record->TYPES as $property => $type) {
-            $statement .= "{$property}, ";
-            $values .= ":" . $property . ", ";
-            $parameters[":" . $property] = $this->record->$property;
+            if (!key_exists($property, $this->record->AUTO_INCREMENT)) {
+                $statement .= "{$property}, ";
+                $values .= ":" . $property . ", ";
+                $parameters[":" . $property] = $this->record->$property;
+            }
         }
         $statement = substr($statement, 0, strlen($statement) - 2);
         $values = substr($values, 0, strlen($values) - 2);

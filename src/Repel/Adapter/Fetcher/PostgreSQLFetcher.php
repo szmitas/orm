@@ -46,6 +46,7 @@ class PostgreSQLFetcher implements FetcherInterface {
         $new_column = new Classes\Column();
         $new_column->name = $row['column_name'];
         $new_column->type = $row['data_type'];
+        $new_column->default = $row['column_default'];
         $new_column->is_primary_key = $row['constraint_type'] === 'PRIMARY KEY' ? 1 : 0;
         $new_column->is_null = $row['is_nullable'] === 'YES' ? 1 : 0;
         if ($row['constraint_type'] === 'FOREIGN KEY') {
@@ -78,7 +79,7 @@ class PostgreSQLFetcher implements FetcherInterface {
         }
 
 
-        $sql = "select columns.table_name,tables.table_type,columns.column_name,columns.is_nullable,columns.data_type,constraints.constraint_type,constraints.referenced_table,constraints.referenced_column
+        $sql = "select columns.table_name,tables.table_type,columns.column_name,columns.column_default,columns.is_nullable,columns.data_type,constraints.constraint_type,constraints.referenced_table,constraints.referenced_column
 FROM information_schema.tables tables JOIN information_schema.columns ON columns.table_name = tables.table_name 
 AND columns.table_schema = tables.table_schema
  

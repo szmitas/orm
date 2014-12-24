@@ -1,4 +1,5 @@
 <?php
+
 namespace Repel\Adapter\Classes;
 
 class Column {
@@ -7,6 +8,7 @@ class Column {
     public $type;
     public $is_null;
     public $is_primary_key;
+    public $default;
     public $foreign_key;
 
 }

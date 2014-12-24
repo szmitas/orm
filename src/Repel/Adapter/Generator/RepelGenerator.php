@@ -274,18 +274,19 @@ class RepelGenerator extends BaseGenerator {
     }
 
     public function generateForeignKeyMethods() {
-        $result = "\t// foreign key methods";
+        $result = "\t// foreign key methods\n";
         foreach ($this->foreign_keys as $name => $fk) {
             $object_name = BaseGenerator::singular($fk->referenced_table);
             $class_name = mb_convert_case(BaseGenerator::singular($fk->referenced_table, false), MB_CASE_LOWER, 'UTF-8');
 
             $result .= "\tpublic function get{$object_name}() {\n";
-            $result .= "\t\tif(\$this->_{$class_name} === null) {\n";
-            $result .= "\t\t\t\$this->_{$class_name} = D{$object_name}::finder()->findByPK(\$this->{$name});\n";
-            $result .= "\t\t}\n";
-            $result .= "\t\treturn \$this->_{$class_name};\n";
+            $result .= "\tif(\$this->_{$class_name} === null) {\n";
+            $result .= "\t\t\$this->_{$class_name} = D{$object_name}::finder()->findByPK(\$this->{$name});\n";
+            $result .= "\t}\n";
+            $result .= "\treturn \$this->_{$class_name};\n";
             $result .= "\t}\n";
         }
+        return $result;
     }
 
     public function generateRelationshipMethods($relationships) {

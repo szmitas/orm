@@ -49,6 +49,7 @@ class PostgreSQLFetcher implements FetcherInterface {
         $new_column->default = $row['column_default'];
         $new_column->is_primary_key = $row['constraint_type'] === 'PRIMARY KEY' ? 1 : 0;
         $new_column->is_null = $row['is_nullable'] === 'YES' ? 1 : 0;
+
         if ($row['constraint_type'] === 'FOREIGN KEY') {
             $new_column->foreign_key = new Classes\ForeignKey($row['referenced_table'], $row['referenced_column']);
         }

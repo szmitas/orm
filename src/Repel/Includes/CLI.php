@@ -58,15 +58,15 @@ class CLI {
     }
 
     public static function failure($ex) {
-        $return = CLI::color("failed", red) . "\n";
+        $return .= CLI::color("failed", red) . "\n";
         $return.= "\n";
         $return.= CLI::color($ex->getMessage(), 'white', 'red') . "\n";
         $return.= "\n";
         return $return;
     }
-    
+
     public static function warning($text) {
-        $return.= "\n";
+        $return = "\n";
         $return.= CLI::color($text, 'white', 'yellow') . "\n";
         $return.= "\n";
         return $return;
@@ -127,6 +127,7 @@ class CLI {
         $text = "\n" . $decoration . " " . $text . " " . $decoration . "\n";
         return $text;
     }
+
     public function h2($text, $length) {
         $text = strtoupper(trim($text));
         $diff = $length - strlen($text);

@@ -112,14 +112,16 @@ class RActiveQuery {
     }
 
     public function count($criteria = null, $parameters = array()) {
-//        $statement = "SELECT COUNT(*) FROM " . $this->_record->TABLE;
-//
-//        if (!$criteria instanceof RActiveRecordCriteria) {
-//            $criteria = new RActiveRecordCriteria($criteria, $parameters);
-//        }
-//        $result = $this->execute($statement, $criteria, $parameters, false, true);
-//
-//        return $result[0]["COUNT(*)"];
+        if ($criteria !== null && $parameters !== null) {
+            if (!$criteria instanceof RActiveRecordCriteria) {
+                $criteria = new RActiveRecordCriteria($criteria, $parameters);
+            }
+        } else {
+            $criteria = new RActiveRecordCriteria($this->_where);
+            $this->_where = array();
+        }
+
+        return RExecutor::instance($this->_record)->count($criteria);
     }
 
     public function findBySql($statement, $criteria = null) {

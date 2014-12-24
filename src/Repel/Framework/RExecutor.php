@@ -129,6 +129,45 @@ class RExecutor {
         return $result->rowCount();
     }
 
+    public function count(RActiveRecordCriteria $criteria) {
+        $table_name = $this->record->TABLE;
+
+        $statement = "SELECT COUNT(*) as count FROM {$table_name}";
+
+        if (strlen($criteria->Condition) > 0) {
+            $statement .= " WHERE " . $criteria->Condition;
+        }
+
+        if ($criteria->OrdersBy !== null) {
+            $statement .= " ORDER BY";
+            foreach ($criteria->OrdersBy as $key => $value) {
+                if (in_array(strtoupper($value), array("ASC", "DESC"))) {
+                    $statement .= " {$table_name}." . $key . " " . strtoupper($value) . ",";
+                } else {
+                    throw new Exception("Wrong statement in ORDER BY clause: " . $value);
+                }
+            }
+            $statement = substr($statement, 0, strlen($statement) - 1); // remove last ,
+        }
+
+        if ((int) $criteria->Limit > 0 && (int) $criteria->Offset === 0) {
+            $statement .= " LIMIT :results_limit";
+            $criteria->Parameters[":results_limit"] = (int) $criteria->Limit;
+        } else if ($criteria->Limit !== null && $criteria->Offset !== null) {
+            $statement .= " LIMIT :results_offset,:results_limit";
+            $criteria->Parameters[":results_limit"] = (int) $criteria->Limit;
+            $criteria->Parameters[":results_offset"] = (int) $criteria->Offset;
+        }
+        if (count($criteria->Parameters) > 0) {
+            $params = $criteria->Parameters;
+        } else {
+            $params = array();
+        }
+
+        $result = $this->execute($statement, $params);
+        return $result->fetch()["count"];
+    }
+
     private function execute($statement, $parameters) {
         $st = $this->PDO->prepare($statement);
 

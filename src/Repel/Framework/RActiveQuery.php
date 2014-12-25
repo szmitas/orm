@@ -31,11 +31,12 @@ class RActiveQuery {
     }
 
     public function findOne($criteria = null, $parameters = array()) {
-        if ($criteria === null && $parameters === null) {
+        if ($criteria !== null) {
             if (!$criteria instanceof RActiveRecordCriteria) {
                 $criteria = new RActiveRecordCriteria($criteria, $parameters);
             }
         } else {
+            echo "nie jest";
             $criteria = new RActiveRecordCriteria($this->_where);
             $this->_where = array();
         }
@@ -46,7 +47,7 @@ class RActiveQuery {
     }
 
     public function find($criteria = null, $parameters = array()) {
-        if ($criteria !== null && $parameters !== null) {
+        if ($criteria !== null) {
             if (!$criteria instanceof RActiveRecordCriteria) {
                 $criteria = new RActiveRecordCriteria($criteria, $parameters);
             }

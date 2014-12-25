@@ -17,17 +17,10 @@ class RActiveRecord {
     }
 
     public function save() {
-
         if ($this->_record) {
             return RExecutor::instance($this)->update();
         } else {
             return RExecutor::instance($this)->insert();
-        }
-    }
-
-    public function delete() {
-        if ($this->_record) {
-            return RExecutor::instance($this)->delete();
         }
     }
 

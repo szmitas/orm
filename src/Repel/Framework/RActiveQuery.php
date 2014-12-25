@@ -118,7 +118,7 @@ class RActiveQuery {
     }
 
     public function count($criteria = null, $parameters = array()) {
-        if ($criteria !== null && count($parameters) > 0) {
+        if ($criteria !== null) {
             if (!$criteria instanceof RActiveRecordCriteria) {
                 $criteria = new RActiveRecordCriteria($criteria, $parameters);
             }

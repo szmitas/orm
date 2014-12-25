@@ -55,12 +55,12 @@ class RExecutor {
             $statement = substr($statement, 0, strlen($statement) - 1); // remove last ,
         }
 
-        if ($criteria->Limit !== null && $criteria->Offset === null) {
+        if ($criteria->Limit !== null) {
             $statement .= " LIMIT :results_limit";
             $criteria->Parameters[":results_limit"] = (int) $criteria->Limit;
-        } else if ($criteria->Limit !== null && $criteria->Offset !== null) {
-            $statement .= " LIMIT :results_offset,:results_limit";
-            $criteria->Parameters[":results_limit"] = (int) $criteria->Limit;
+        }
+        if ($criteria->Offset !== null) {
+            $statement .= " OFFSET :results_offset";
             $criteria->Parameters[":results_offset"] = (int) $criteria->Offset;
         }
         if (count($criteria->Parameters) > 0) {

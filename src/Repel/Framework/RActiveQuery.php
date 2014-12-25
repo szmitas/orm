@@ -23,7 +23,7 @@ class RActiveQuery {
     }
 
     public function findByPK($key) {
-        return $this->findByColumn(Generator\BaseGenerator::tableToPK($this->_record->TABLE), $key);
+        return $this->findOneByColumn(Generator\BaseGenerator::tableToPK($this->_record->TABLE), $key);
     }
 
     public function findByPKs($keys) {

@@ -101,18 +101,18 @@ class RExecutor {
         return $st->fetch()["id"];
     }
 
-    public function delete() {
-        $primary_key = Generator\BaseGenerator::tableToPK($this->_record->TABLE);
-
-        //delete from admins where admin_id=1
-        $parameters = array();
-        $statement = "DELETE FROM {$this->_record->TABLE} ";
-        $statement .= " WHERE {$this->_record->TABLE}.{$primary_key} = :{$primary_key}";
-        $parameters[":{$primary_key}"] = $this->_record->$primary_key;
-
-        $result = $this->execute($statement, $parameters);
-        return $result->rowCount();
-    }
+//	public function delete() {
+//		$primary_key = Generator\BaseGenerator::tableToPK( $this->_record->TABLE );
+//
+//		//delete from admins where admin_id=1
+//		$parameters						 = array();
+//		$statement						 = "DELETE FROM {$this->_record->TABLE} ";
+//		$statement .= " WHERE {$this->_record->TABLE}.{$primary_key} = :{$primary_key}";
+//		$parameters[":{$primary_key}"]	 = $this->_record->$primary_key;
+//
+//		$result = $this->execute( $statement, $parameters );
+//		return $result->rowCount();
+//	}
 
     public function update() {
         $primary_key = Generator\BaseGenerator::tableToPK($this->_record->TABLE);

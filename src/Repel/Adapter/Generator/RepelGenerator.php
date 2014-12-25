@@ -410,7 +410,7 @@ class RepelGenerator extends BaseGenerator {
 
         $result = "\tpublic function save() {\n";
         $result .= "\t\t\$id = parent::save();\n";
-        $result .= "\t\tif(\$id !== null) {\n";
+        $result .= "\t\tif(\$this->{$primary_key} === null) {\n";
         $result .= "\t\t\t\$this->{$primary_key} = \$id;\n";
         $result .= "\t\t}\n";
         $result .= "\t\treturn \$id;\n";

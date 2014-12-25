@@ -140,8 +140,7 @@ class RepelGenerator extends BaseGenerator {
     }
 
     public function generateTableBase($table) {
-        $table_name = BaseGenerator::singular($table->name);
-        $this->table_name = $table_name;
+        $this->table_name = $table->name;
         $result = "<?php" . "\n\n";
         $result .= "namespace data\Base;\n";
         $result .= "\n";

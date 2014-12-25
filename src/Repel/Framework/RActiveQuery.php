@@ -22,6 +22,12 @@ class RActiveQuery {
         $this->_where = array();
     }
 
+    static public function create() {
+        $class_query = get_called_class();
+        $class_record = substr($class_query, 0, strlen($class_query) - 5);
+        return new $class_query($class_record);
+    }
+
     public function findByPK($key) {
         return $this->findOneByColumn(Generator\BaseGenerator::tableToPK($this->_record->TABLE), $key);
     }
@@ -112,7 +118,7 @@ class RActiveQuery {
     }
 
     public function count($criteria = null, $parameters = array()) {
-        if ($criteria !== null && $parameters !== null) {
+        if ($criteria !== null && count($parameters) > 0) {
             if (!$criteria instanceof RActiveRecordCriteria) {
                 $criteria = new RActiveRecordCriteria($criteria, $parameters);
             }
@@ -124,8 +130,12 @@ class RActiveQuery {
         return RExecutor::instance($this->_record)->count($criteria);
     }
 
-    public function findBySql($statement, $criteria = null) {
-        // todo
+    public function findBySql($statement, $parameters = array()) {
+        return RExecutor::instance($this->_record)->findBySql($statement, $parameters, true);
+    }
+
+    public function findOneBySql($statement, $parameters = array()) {
+        return RExecutor::instance($this->_record)->findBySql($statement, $parameters, false);
     }
 
 }

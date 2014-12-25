@@ -2,6 +2,8 @@
 
 namespace Repel\Adapter\Generator;
 
+use Repel\Framework;
+
 class BaseGenerator {
 
     public static function singular($word, $delete_underscores = true) {
@@ -86,15 +88,32 @@ class BaseGenerator {
 
         while (substr_count($name, "ies_")) {
             $index = strpos($name, "ies_");
-            $name = FString::replace_limit("ies_", "y_", $name);
+            $name = self::replace_limit("ies_", "y_", $name);
         }
 
         while (substr_count($name, "s_")) {
             $index = strpos($name, "s_");
-            $name = FString::replace_limit("s_", "_", $name);
+            $name = self::replace_limit("s_", "_", $name);
         }
 
         return mb_convert_case($name . "_id", MB_CASE_LOWER, 'UTF-8');
+    }
+
+    public static function replace_limit($search, $replace, $string, $limit = 1) {
+        if (is_bool($pos = (strpos($string, $search)))) {
+            return $string;
+        }
+
+        $search_len = strlen($search);
+
+        for ($i = 0; $i < $limit; $i++) {
+            $string = substr_replace($string, $replace, $pos, $search_len);
+
+            if (is_bool($pos = (strpos($string, $search)))) {
+                break;
+            }
+        }
+        return $string;
     }
 
 }

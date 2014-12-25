@@ -78,6 +78,16 @@ class RExecutor {
         }
     }
 
+    public function findBySql($statement, $parameters, $multiple) {
+        $result = $this->execute($statement, $parameters);
+
+        if ($multiple) {
+            return $result->fetchAll(\PDO::FETCH_ASSOC);
+        } else {
+            return $result->fetch(\PDO::FETCH_ASSOC);
+        }
+    }
+
     public function insert() {
         $primary_key = Generator\BaseGenerator::tableToPK($this->_record->TABLE);
         $parameters = array();

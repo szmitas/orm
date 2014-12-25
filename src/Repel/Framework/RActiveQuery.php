@@ -36,7 +36,6 @@ class RActiveQuery {
                 $criteria = new RActiveRecordCriteria($criteria, $parameters);
             }
         } else {
-            echo "nie jest";
             $criteria = new RActiveRecordCriteria($this->_where);
             $this->_where = array();
         }

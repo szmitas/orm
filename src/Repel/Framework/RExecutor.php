@@ -96,7 +96,7 @@ class RExecutor {
         $values = "( ";
         foreach ($this->_record->TYPES as $property => $type) {
             if (!in_array($property, $this->_record->AUTO_INCREMENT) && (!in_array($property, $this->_record->DEFAULT) || (in_array($property, $this->_record->DEFAULT) && $this->_record->$property !== null))) {
-                $statement .= "{$property}, ";
+                $statement .= "\"{$property}\", ";
                 $values .= ":" . $property . ", ";
                 $parameters[":" . $property] = $this->_record->$property;
             }
@@ -131,7 +131,7 @@ class RExecutor {
         $statement = "UPDATE {$this->_record->TABLE} SET ";
 
         foreach ($this->_record->TYPES as $property => $type) {
-            $statement .= "{$property} = :{$property}, ";
+            $statement .= "\"{$property}\" = :{$property}, ";
             $parameters[":{$property}"] = $this->_record->$property;
         }
 

@@ -12,7 +12,7 @@ class FDbConnection {
         $this->_driver = $driver;
         $this->PDOInstance = new \PDO($driver, $user, $password);
 //        $this->PDOInstance->query("SET NAMES " . $db_charset . " COLLATE " . $db_collate);
-        $this->PDOInstance->query("SET time_zone = 'Europe/Warsaw'");
+        $this->PDOInstance->query("SET TIME ZONE 'Europe/Warsaw'");
         //$this->PDOInstance->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING );
     }
 

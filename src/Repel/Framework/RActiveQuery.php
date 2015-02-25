@@ -29,11 +29,11 @@ class RActiveQuery {
     }
 
     public function findByPK($key) {
-        return $this->findOneByColumn(Generator\BaseGenerator::tableToPK($this->_record->TABLE), $key);
+        return $this->findOneByColumn($this->_record->PRIMARY_KEYS[0], $key);
     }
 
     public function findByPKs($keys) {
-        return $this->findByColumn(Generator\BaseGenerator::tableToPK($this->_record->TABLE), $keys);
+        return $this->findByColumn($this->_record->PRIMARY_KEYS[0], $keys);
     }
 
     public function findOne($criteria = null, $parameters = array()) {

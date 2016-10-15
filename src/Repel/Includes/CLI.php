@@ -73,7 +73,7 @@ class CLI {
 	}
 
 // Returns colored string
-	public function color( $string, $foreground_color = null, $background_color = null ) {
+	public static function color( $string, $foreground_color = null, $background_color = null ) {
 		$colored_string = "";
 
 // Check if given foreground color found
@@ -92,16 +92,16 @@ class CLI {
 	}
 
 // Returns all foreground color names
-	public function getForegroundColors() {
+	public static function getForegroundColors() {
 		return array_keys( self::foreground_colors );
 	}
 
 // Returns all background color names
-	public function getBackgroundColors() {
+	public static function getBackgroundColors() {
 		return array_keys( self::background_colors );
 	}
 
-	public function dotFill( $text, $length ) {
+	public static function dotFill( $text, $length ) {
 		$diff = $length - strlen( $text );
 		if ( $diff > 0 ) {
 			for ( $i = 0; $i < $diff; $i++ ) {
@@ -111,7 +111,7 @@ class CLI {
 		return $text;
 	}
 
-	public function h1( $text, $length ) {
+	public static function h1( $text, $length ) {
 		$text	 = strtoupper( trim( $text ) );
 		$diff	 = $length - strlen( $text );
 		if ( $diff < 2 ) {
@@ -128,7 +128,7 @@ class CLI {
 		return $text;
 	}
 
-	public function h2( $text, $length ) {
+	public static function h2( $text, $length ) {
 		$text	 = strtoupper( trim( $text ) );
 		$diff	 = $length - strlen( $text );
 		if ( $diff < 2 ) {

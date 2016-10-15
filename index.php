@@ -8,4 +8,6 @@ try {
 } catch (Exception $e) {
     echo $e;
 }
-	
+
+$company = new data\DCompany();
+var_dump($company);
